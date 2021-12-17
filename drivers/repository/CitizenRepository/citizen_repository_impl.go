@@ -22,3 +22,12 @@ func (repository *CitizenRepositoryImpl) Register(ctx context.Context, citizens 
 	}
 	return citizens, nil
 }
+
+func (repository *CitizenRepositoryImpl) FindByEmail(ctx context.Context, email string) (records.Citizen, error) {
+	citizen := records.Citizen{}
+	err := repository.client.Conn().WithContext(ctx).Where("email = ?", email).First(&citizen).Error
+	if err != nil{
+		return citizen, err
+	}
+	return citizen, nil
+}

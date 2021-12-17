@@ -1,18 +1,33 @@
 package CitizenService
 
 import (
-	"gorm.io/gorm"
-	"time"
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
+	"gopkg.in/guregu/null.v4"
 )
 
 type Citizen struct {
-	gorm.Model
-	Id              int    `gorm:"primary_key, autoIncrement,not null"`
-	Name            string `gorm:"not null"`
-	NIK             string `gorm:"not null"`
-	Address         string `gorm:"not null"`
+	Id              int
+	Name            string
+	Email           string
+	Password        string
+	NIK             string
+	Address         string
 	HandphoneNumber int
 	VaccinePass     string
-	StatusVaccines  string `gorm:"type:enum('BELUM VAKSIN', 'VAKSIN DOSIS 1', 'VAKSIN DOSIS 2');default:'BELUM VAKSIN'"`
-	Birthday        time.Time
+	StatusVaccines  string
+	Birthday        null.Time
+}
+
+func (citizen Citizen) Validate() error {
+	return validation.ValidateStruct(&citizen,
+		//validasi Nama tidak boleh kosong
+		validation.Field(&citizen.Name, validation.Required),
+		//validasi Email no kosong, and regex
+		validation.Field(&citizen.Email, validation.Required, is.Email),
+		//validasi NIK tidak boleh kosong
+		validation.Field(&citizen.NIK, validation.Required),
+		//validation password no kosong
+		validation.Field(&citizen.Password, validation.Required),
+	)
 }
