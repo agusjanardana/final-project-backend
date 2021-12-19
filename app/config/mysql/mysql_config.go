@@ -21,7 +21,7 @@ func New(configuration config.Config) Client {
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	exceptions.PanicIfError(err)
 
-	err = db.AutoMigrate(records.Citizen{})
+	err = db.AutoMigrate(records.Citizen{}, records.HealthFacilitator{})
 	exceptions.PanicIfError(err)
 
 	log.Println("MySql Connected")
