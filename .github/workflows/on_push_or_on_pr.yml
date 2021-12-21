@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - "master"
-  pull_request:
-    branches:
-      - "master"
 
 jobs:
   unit-test:
@@ -85,5 +82,5 @@ jobs:
           -e DB_PASSWORD=$DB_PASSWORD \
           -e DB_NAME=$DB_NAME \
           -e JWT_SECRET=$JWT_SECRET \
-          -e JWT_EXPIRED=JWT_EXPIRED \
+          -e JWT_EXPIRED=$JWT_EXPIRED \
           ryudential/vaccine-apps-backend:1.0.0'
