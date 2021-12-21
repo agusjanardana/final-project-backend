@@ -19,8 +19,7 @@ import (
 )
 
 func main(){
-	err := godotenv.Load()
-	exceptions.PanicIfError(err)
+	_ = godotenv.Load()
 	e := echo.New()
 	//handle error midleware
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
