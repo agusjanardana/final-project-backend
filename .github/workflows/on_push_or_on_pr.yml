@@ -1,0 +1,89 @@
+name: AWS EC2 CI/ID
+
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "master"
+
+jobs:
+  unit-test:
+    name: "Unit Testing"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      - name: Running Unit-Test
+        run: go test ./... -cover
+
+  build-push-docker:
+    name: Build docker image then push to docker hub
+    runs-on: ubuntu-latest
+    needs: Unit-Test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build Docker Image
+        run: docker build -t ryudential/vaccine-apps-backend:1.0.0 .
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push image to Docker Hub
+        run: docker push ryudential/vaccine-apps-backend:1.0.0
+
+  deployment-ec2-aws:
+    name: Deploy to AWS EC2
+    runs-on: ubuntu-latest
+    needs: build-push-docker
+    steps:
+      - uses: actions/checkout@v2
+      - name: SSH Config
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/laundroapi.pem
+          chmod 400 ~/.ssh/laundroapi.pem
+          cat >>~/.ssh/config <<END
+          Host development
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/laundroapi.pem
+            StrictHostKeyChecking=no
+          END
+      - name: Connect to EC2 instance & run Docker image from registry
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRED: ${{ secrets.JWT_EXPIRED }}
+        run: |
+          ssh development 'export DB_USER='"'$DB_USER'"' && \
+          export DB_PASSWORD='"'$DB_PASSWORD'"' && \
+          export DB_HOST='"'$DB_HOST'"' && \
+          export DB_PORT='"'$DB_PORT'"' && \
+          export DB_NAME='"'$DB_NAME'"' && \
+          export JWT_SECRET='"'$JWT_SECRET'"' && \
+          export JWT_EXPIRED='"'JWT_EXPIRED'"' && \
+          docker rm -vf $(docker ps -a -q) || true && \
+          docker pull ryudential/vaccine-apps-backend:1.0.0 && \
+          docker run -d -p 8080:8000 --name vaccine-api \
+          -e DB_HOST=$DB_HOST \
+          -e DB_PORT=$DB_PORT \
+          -e DB_USER=$DB_USER \
+          -e DB_PASSWORD=$DB_PASSWORD \
+          -e DB_NAME=$DB_NAME \
+          -e JWT_SECRET=$JWT_SECRET \
+          -e JWT_EXPIRED=JWT_EXPIRED \
+          ryudential/vaccine-apps-backend:1.0.0'
