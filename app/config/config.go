@@ -3,7 +3,6 @@ package config
 import (
 	"github.com/joho/godotenv"
 	"os"
-	"vaccine-app-be/exceptions"
 )
 
 type Config interface {
@@ -11,8 +10,7 @@ type Config interface {
 }
 
 func New(filenames ...string) Config {
-	err := godotenv.Load(filenames...)
-	exceptions.PanicIfError(err)
+	_ = godotenv.Load(filenames...)
 	return &config{}
 }
 
