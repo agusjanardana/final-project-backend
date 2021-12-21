@@ -50,13 +50,13 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/laundroapi.pem
-          chmod 400 ~/.ssh/laundroapi.pem
+          echo "$SSH_KEY" > ~/.ssh/vaccine-be.pem
+          chmod 400 ~/.ssh/vaccine-be.pem
           cat >>~/.ssh/config <<END
           Host development
             HostName $SSH_HOST
             User $SSH_USER
-            IdentityFile ~/.ssh/laundroapi.pem
+            IdentityFile ~/.ssh/vaccine-be.pem
             StrictHostKeyChecking=no
           END
       - name: Connect to EC2 instance & run Docker image from registry
@@ -78,7 +78,7 @@ jobs:
           export JWT_EXPIRED='"'JWT_EXPIRED'"' && \
           docker rm -vf $(docker ps -a -q) || true && \
           docker pull ryudential/vaccine-apps-backend:1.0.0 && \
-          docker run -d -p 8080:8000 --name vaccine-api \
+          docker run -d -p 8080:8080 --name vaccine-api \
           -e DB_HOST=$DB_HOST \
           -e DB_PORT=$DB_PORT \
           -e DB_USER=$DB_USER \

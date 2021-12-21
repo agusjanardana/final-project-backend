@@ -3,6 +3,7 @@ package CitizenService
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/jinzhu/copier"
 	"vaccine-app-be/app/middleware"
 	"vaccine-app-be/drivers/records"
@@ -33,7 +34,7 @@ func (service *CitizenServiceImpl) Register(ctx context.Context, citizen Citizen
 		return citizen, err
 	}
 
-	if(byEmail.Email == citizen.Email){
+	if byEmail.Email == citizen.Email {
 		return citizen, errors.New("email already used")
 	}
 
@@ -66,7 +67,9 @@ func (service *CitizenServiceImpl) Login(ctx context.Context, email, password st
 	if err != nil {
 		return "", err
 	}
+	fmt.Println("test", password, "dan", byEmail.Email)
 	matchPassword := utilities.CheckPasswordHash(password, byEmail.Password)
+
 	if !matchPassword{
 		return "", errors.New("password doesn't match")
 	}
