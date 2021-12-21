@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jinzhu/copier"
+	"gorm.io/gorm"
 	"vaccine-app-be/app/middleware"
 	"vaccine-app-be/drivers/records"
 	"vaccine-app-be/drivers/repository/CitizenRepository"
@@ -30,7 +31,7 @@ func (service *CitizenServiceImpl) Register(ctx context.Context, citizen Citizen
 	}
 	//checking if emails is already used
 	byEmail, err := service.CitizenRepository.FindByEmail(ctx, citizen.Email)
-	if err != nil {
+	if err != nil && !errors.Is(err,gorm.ErrRecordNotFound) {
 		return citizen, err
 	}
 
