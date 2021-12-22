@@ -3,7 +3,6 @@ package CitizenService
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 	"vaccine-app-be/app/middleware"
@@ -68,7 +67,6 @@ func (service *CitizenServiceImpl) Login(ctx context.Context, email, password st
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("test", password, "dan", byEmail.Email)
 	matchPassword := utilities.CheckPasswordHash(password, byEmail.Password)
 
 	if !matchPassword{

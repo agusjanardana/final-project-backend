@@ -13,9 +13,12 @@ import (
 	middleware2 "vaccine-app-be/app/middleware"
 	"vaccine-app-be/app/routes"
 	"vaccine-app-be/controllers/CitizenController"
+	"vaccine-app-be/controllers/HealthController"
 	"vaccine-app-be/drivers/repository/CitizenRepository"
+	"vaccine-app-be/drivers/repository/HealthRepository"
 	"vaccine-app-be/exceptions"
 	"vaccine-app-be/services/CitizenService"
+	"vaccine-app-be/services/HfService"
 )
 
 func main(){
@@ -27,6 +30,13 @@ func main(){
 		DisableStackAll: true,
 	}))
 	e.HTTPErrorHandler = exceptions.ErrorHandler
+
+	//handle CORS
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowMethods: []string{http.MethodGet, http.MethodHead, http.MethodPut, http.MethodPatch, http.MethodPost, http.MethodDelete},
+	}))
 
 
 	cfg:= config.New()
@@ -46,8 +56,14 @@ func main(){
 	citizenServ := CitizenService.NewCitizenService(citizenRepo, &configJWT)
 	citizenCtrl := CitizenController.NewCitizenController(citizenServ)
 
+	//HealthFa
+	healthRepo := HealthRepository.NewHealthRepository(mysqlClient)
+	healthServ := HfService.NewHealthService(healthRepo, &configJWT)
+	healthCtrl := HealthController.NewHealthFacilitatorsController(healthServ)
+
 	routesInit := routes.ControllerList{
 		CitizenController: citizenCtrl,
+		HealthController: healthCtrl,
 	}
 	routesInit.Registration(e)
 	if err := e.Start(":8080"); err != http.ErrServerClosed {
