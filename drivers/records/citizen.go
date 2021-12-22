@@ -17,4 +17,5 @@ type Citizen struct {
 	VaccinePass     string
 	StatusVaccines  string `gorm:"type:enum('BELUM VAKSIN', 'VAKSIN DOSIS 1', 'VAKSIN DOSIS 2');default:'BELUM VAKSIN'"`
 	Birthday        null.Time
+	FamilyMember    []FamilyMember `gorm:"foreignKey:CitizenId"`
 }
