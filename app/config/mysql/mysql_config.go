@@ -21,7 +21,7 @@ func New(configuration config.Config) Client {
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	exceptions.PanicIfError(err)
 
-	err = db.AutoMigrate(records.Citizen{}, records.HealthFacilitator{})
+	err = db.AutoMigrate(records.Citizen{}, records.HealthFacilitator{}, records.FamilyMember{})
 	exceptions.PanicIfError(err)
 
 	log.Println("MySql Connected")
@@ -45,20 +45,20 @@ func (c *client) Close() {
 }
 
 type mySQLConfig struct {
-	Host string
+	Host     string
 	Password string
-	Port string
-	User string
-	DBName string
+	Port     string
+	User     string
+	DBName   string
 }
 
 func newMySQLConfig(configuration config.Config) *mySQLConfig {
 	dbConfig := mySQLConfig{
-		Host: configuration.Get("DB_HOST"),
-		Port: configuration.Get("DB_PORT"),
-		User: configuration.Get("DB_USER"),
+		Host:     configuration.Get("DB_HOST"),
+		Port:     configuration.Get("DB_PORT"),
+		User:     configuration.Get("DB_USER"),
 		Password: configuration.Get("DB_PASSWORD"),
-		DBName: configuration.Get("DB_NAME"),
+		DBName:   configuration.Get("DB_NAME"),
 	}
 
 	return &dbConfig
