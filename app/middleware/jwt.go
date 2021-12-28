@@ -51,6 +51,12 @@ func GetUserId(c echo.Context) int {
 	return id
 }
 
+func getClaim(c echo.Context) jwtCustomClaims{
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*jwtCustomClaims)
+	return *claims
+}
+
 func GetUserName(c echo.Context) string {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(*jwtCustomClaims)

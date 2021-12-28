@@ -10,9 +10,9 @@ type FamilyMember struct {
 	Id        int    `gorm:"not null, primary_key, autoIncrement"`
 	Name      string `gorm:"not null"`
 	Birthday  time.Time
-	Nik       int    `gorm:"not null"`
+	Nik       string `gorm:"not null"`
 	Gender    string `gorm:"not null"`
 	Age       int    `gorm:"not null"`
-	Handphone int    `gorm:"not null"`
+	Handphone string `gorm:"not null"`
 	CitizenId int
 }

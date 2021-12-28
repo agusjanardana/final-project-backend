@@ -13,7 +13,7 @@ type Citizen struct {
 	Password        string `gorm:"not null"`
 	NIK             string `gorm:"not null"`
 	Address         string `gorm:"not null"`
-	HandphoneNumber int
+	HandphoneNumber string
 	VaccinePass     string
 	StatusVaccines  string `gorm:"type:enum('BELUM VAKSIN', 'VAKSIN DOSIS 1', 'VAKSIN DOSIS 2');default:'BELUM VAKSIN'"`
 	Birthday        null.Time

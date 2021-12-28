@@ -13,15 +13,18 @@ import (
 	middleware2 "vaccine-app-be/app/middleware"
 	"vaccine-app-be/app/routes"
 	"vaccine-app-be/controllers/CitizenController"
+	"vaccine-app-be/controllers/FamilyController"
 	"vaccine-app-be/controllers/HealthController"
 	"vaccine-app-be/drivers/repository/CitizenRepository"
+	"vaccine-app-be/drivers/repository/FamilyRepository"
 	"vaccine-app-be/drivers/repository/HealthRepository"
 	"vaccine-app-be/exceptions"
 	"vaccine-app-be/services/CitizenService"
+	"vaccine-app-be/services/FamilyService"
 	"vaccine-app-be/services/HfService"
 )
 
-func main(){
+func main() {
 	_ = godotenv.Load()
 	e := echo.New()
 	//handle error midleware
@@ -38,8 +41,7 @@ func main(){
 		AllowMethods: []string{http.MethodGet, http.MethodHead, http.MethodPut, http.MethodPatch, http.MethodPost, http.MethodDelete},
 	}))
 
-
-	cfg:= config.New()
+	cfg := config.New()
 	mysqlClient := mysql.New(cfg)
 	defer mysqlClient.Close()
 
@@ -61,15 +63,19 @@ func main(){
 	healthServ := HfService.NewHealthService(healthRepo, &configJWT)
 	healthCtrl := HealthController.NewHealthFacilitatorsController(healthServ)
 
+	//Family
+	familyRepo := FamilyRepository.NewFamilyRepository(mysqlClient)
+	familyServ := FamilyService.NewFamilyService(familyRepo)
+	familyCtrl := FamilyController.NewFamilyControllerImpl(familyServ)
+
 	routesInit := routes.ControllerList{
+		JWTMiddleware:     configJWT.Init(),
 		CitizenController: citizenCtrl,
-		HealthController: healthCtrl,
+		HealthController:  healthCtrl,
+		FamilyController:  familyCtrl,
 	}
 	routesInit.Registration(e)
 	if err := e.Start(":8080"); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 }
-
-
-

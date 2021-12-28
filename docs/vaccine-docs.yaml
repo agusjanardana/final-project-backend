@@ -4,13 +4,15 @@ info:
   description: Vaccine Docs API - Alterra Academy
   version: 1.0.0
 servers:
-  - url: 'https://localhost:8080'
+  - url: 'https://localhost:8080/api/v1'
 
 tags:
   - name: Healts Facilitators
     description: Sebuah lembaga yang bertanggung jawab melakukan vaksinisasi.
   - name: Citizens
     description: Masyarakat yang berhubungan dengan sistem
+  - name: CRUD family
+    description: Cread, ready, update, dan delete untuk citizen terhadap keluarga mereka.
 
 paths:
   /citizen/registers:
@@ -64,10 +66,458 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/response500"
+  /citizen/logins:
+    post:
+      tags:
+        - Citizens
+      description: citizen login
+      summary: citizen login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: juna@yawanmail.comn
+                password:
+                  type: string
+                  example: password123
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/successResponse"
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: 123132asdasdas12sad
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response404"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response500"
+  /admin/registers:
+    post:
+      tags:
+        - Healts Facilitators
+      description: Health Facilitators API to register
+      summary: HF to register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                facilitator_name:
+                  type: string
+                  example: test
+                email:
+                  type: string
+                  example: test@gmail.com
+                password:
+                  type: string
+                  example: test123password
+                address:
+                  type: string
+                  example: address
+                longitude:
+                  type: string
+                  example: 123asda
+                latitude:
+                  type: string
+                  example: -123142
+                type:
+                  type: string
+                  example: Rumah Sakit
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/healthRegisterResponse"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response404"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response500"
+  /admin/logins:
+    post:
+      tags:
+        - Healts Facilitators
+      description: Healts Facilitators Login
+      summary: Healts Facilitators Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: juna@yawanmail.comn
+                password:
+                  type: string
+                  example: password123
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/successResponse"
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: 123132asdasdas12sad
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response404"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response500"
+  /families/{id}:
+    get:
+      tags:
+        - CRUD family
+      summary: "Get family member by its ID"
+      description: "To get family member by id"
+      parameters:
+        - name: id
+          in: path
+          description: your own id
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/successResponse"
+                  data:
+                    $ref: "#/components/schemas/getFamilyByIdResponse"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response404"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response500"
+  /families:
+    post:
+      tags:
+        - CRUD family
+      description: create family
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/addFamilyRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/successResponse"
+                  data:
+                    $ref: "#/components/schemas/addFamilyResponse"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response404"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response500"
+  /family/citizens:
+    get:
+      tags:
+        - CRUD family
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/successResponse"
+                  data:
+                    $ref: "#/components/schemas/getFamilyOwnedByCitizenResponse"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response404"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response500"
+  /families/edit/{id}:
+    put:
+      tags:
+        - CRUD family
+      summary: "Edit your Family Member"
+      parameters:
+        - name: id
+          in: path
+          description: your own id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: agus
+                birthday:
+                  type: string
+                  example: 12-12-12-12
+                nik:
+                  type: integer
+                  example: 1234
+                gender:
+                  type: string
+                  example: male
+                age:
+                  type: integer
+                  example: 12
+                handphone:
+                  type: string
+                  example: 123123
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/successResponse"
+                  data:
+                    $ref: "#/components/schemas/addFamilyResponse"
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response404"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response500"
+  /families/delete/{id}:
+    delete:
+      tags:
+        - CRUD family
+      parameters:
+        - name: id
+          in: path
+          description: your own id
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    $ref: "#/components/schemas/successResponse"
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: success delete family
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response404"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/response500"
+
+
 
 
 components:
   schemas:
+    getFamilyOwnedByCitizenResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 1
+          name:
+            type: string
+            example: agus
+          birthday:
+            type: string
+            example: 12-12-12-12
+          nik:
+            type: integer
+            example: 1234
+          gender:
+            type: string
+            example: male
+          age:
+            type: integer
+            example: 12
+          handphone:
+            type: string
+            example: 123123
+    addFamilyResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Juna
+        birthday:
+          type: string
+          example: 2021-12-27T10:31:58Z
+        nik:
+          type: integer
+          example: 123123123
+        age:
+          type: integer
+          example: 12
+        handphone:
+          type: string
+          example: 198238921
+        gender:
+          type: string
+          example: male
+    addFamilyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Juna
+        birthday:
+          type: string
+          example: 2021-12-27T10:31:58Z
+        nik:
+          type: integer
+          example: 123123123
+        age:
+          type: integer
+          example: 12
+        handphone:
+          type: string
+          example: 198238921
+        gender:
+          type: string
+          example: male
+    getFamilyByIdResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: agus
+        birthday:
+          type: string
+          example: 24-09-2049ISO
+        nik:
+          type: integer
+          example: 1231231238
+        gender:
+          type: string
+          example: male
+        age:
+          type: integer
+          example: 14
+        Handphone:
+          type: string
+          example: 123198123
+    healthRegisterResponse:
+      type: object
+      properties:
+        facilitator_name:
+          type: string
+          example: test
+        email:
+          type: string
+          example: test@gmail.com
+        address:
+          type: string
+          example: address
+        longitude:
+          type: string
+          example: 123asda
+        latitude:
+          type: string
+          example: -123142
+        type:
+          type: string
+          example: Rumah Sakit
     userRegisterResponse:
       type: object
       properties:
