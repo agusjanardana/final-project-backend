@@ -13,7 +13,7 @@ type Citizen struct {
 	Password        string
 	NIK             string
 	Address         string
-	HandphoneNumber int
+	HandphoneNumber string
 	VaccinePass     string
 	StatusVaccines  string
 	Birthday        null.Time
