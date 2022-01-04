@@ -2,11 +2,12 @@ package CitizenRepository
 
 import (
 	"context"
+	"time"
 	"vaccine-app-be/app/config/mysql"
 	"vaccine-app-be/drivers/records"
 )
 
-type CitizenRepositoryImpl struct{
+type CitizenRepositoryImpl struct {
 	client mysql.Client
 }
 
@@ -26,8 +27,22 @@ func (repository *CitizenRepositoryImpl) Register(ctx context.Context, citizens 
 func (repository *CitizenRepositoryImpl) FindByEmail(ctx context.Context, email string) (records.Citizen, error) {
 	citizen := records.Citizen{}
 	err := repository.client.Conn().WithContext(ctx).Where("email = ?", email).First(&citizen).Error
-	if err != nil{
+	if err != nil {
 		return citizen, err
+	}
+	return citizen, nil
+}
+
+func (repository *CitizenRepositoryImpl) Update(ctx context.Context, userId int, birthDay time.Time, address string) (records.Citizen, error) {
+	citizen := records.Citizen{}
+	err := citizen.Birthday.Scan(birthDay)
+	if err != nil {
+		return records.Citizen{}, err
+	}
+	citizen.Address = address
+	err = repository.client.Conn().WithContext(ctx).Where("id = ?", userId).Updates(&citizen).Error
+	if err != nil {
+		return records.Citizen{}, err
 	}
 	return citizen, nil
 }

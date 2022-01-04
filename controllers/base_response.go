@@ -14,13 +14,22 @@ type BaseReponses struct {
 	} `json:"meta"`
 	Data interface{} `json:"data"`
 }
+
 func NewSuccessResponse(c echo.Context, data interface{}) error {
 	response := BaseReponses{}
-	response.Meta.Status =http.StatusOK
+	response.Meta.Status = http.StatusOK
 	response.Meta.Message = "success"
 	response.Data = data
 
 	return c.JSON(http.StatusOK, response)
+}
+
+func ForbiddenRequest(c echo.Context, error int, err error) error {
+	response := BaseReponses{}
+	response.Meta.Status = error
+	response.Meta.Message = "forbidden access"
+
+	return c.JSON(http.StatusForbidden, response)
 }
 
 func BadRequestResponse(c echo.Context, error int, err error) error {

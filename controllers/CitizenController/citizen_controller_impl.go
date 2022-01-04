@@ -4,6 +4,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"vaccine-app-be/app/middleware"
 	"vaccine-app-be/controllers"
 	"vaccine-app-be/controllers/CitizenController/web"
 	"vaccine-app-be/services/CitizenService"
@@ -42,7 +43,7 @@ func (citizenCtrl *CitizenControllerImpl) Login(c echo.Context) error {
 
 	req := web.CitizenLoginRequest{}
 	err := c.Bind(&req)
-	if err != nil{
+	if err != nil {
 		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
 	}
 
@@ -52,6 +53,25 @@ func (citizenCtrl *CitizenControllerImpl) Login(c echo.Context) error {
 	}
 
 	return controllers.NewSuccessResponse(c, echo.Map{
-		"token" : login,
+		"token": login,
 	})
+}
+
+func (citizenCtrl *CitizenControllerImpl) Update(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	req := web.CitizenUpdateRequest{}
+	ctxCitizenId := middleware.GetUserId(c)
+	err := c.Bind(&req)
+	if err != nil {
+		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
+	}
+	update, err := citizenCtrl.citizenService.Update(ctx, ctxCitizenId, req.Birthday, req.Address)
+	if err != nil {
+		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
+	}
+	entity := web.CitizenUpdateResponse{}
+	copier.Copy(&entity, &update)
+
+	return controllers.NewSuccessResponse(c, entity)
 }

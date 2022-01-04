@@ -70,6 +70,6 @@ func (service *HealthServiceImpl) Login(ctx context.Context, email, password str
 	if !matchPassword{
 		return "", errors.New("password doesn't match")
 	}
-	jwt := service.jwtAuth.GenerateToken(byEmail.Id, byEmail.Name)
+	jwt := service.jwtAuth.GenerateToken(byEmail.Id, byEmail.Name, byEmail.Role)
 	return jwt, nil
 }

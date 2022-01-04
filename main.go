@@ -15,13 +15,16 @@ import (
 	"vaccine-app-be/controllers/CitizenController"
 	"vaccine-app-be/controllers/FamilyController"
 	"vaccine-app-be/controllers/HealthController"
+	"vaccine-app-be/controllers/VaccineController"
 	"vaccine-app-be/drivers/repository/CitizenRepository"
 	"vaccine-app-be/drivers/repository/FamilyRepository"
 	"vaccine-app-be/drivers/repository/HealthRepository"
+	"vaccine-app-be/drivers/repository/VaccineRepository"
 	"vaccine-app-be/exceptions"
 	"vaccine-app-be/services/CitizenService"
 	"vaccine-app-be/services/FamilyService"
 	"vaccine-app-be/services/HfService"
+	"vaccine-app-be/services/VaccineService"
 )
 
 func main() {
@@ -53,11 +56,6 @@ func main() {
 		ExpiredIn: EXPIRED,
 	}
 
-	//citizen
-	citizenRepo := CitizenRepository.NewCitizenRepository(mysqlClient)
-	citizenServ := CitizenService.NewCitizenService(citizenRepo, &configJWT)
-	citizenCtrl := CitizenController.NewCitizenController(citizenServ)
-
 	//HealthFa
 	healthRepo := HealthRepository.NewHealthRepository(mysqlClient)
 	healthServ := HfService.NewHealthService(healthRepo, &configJWT)
@@ -68,11 +66,22 @@ func main() {
 	familyServ := FamilyService.NewFamilyService(familyRepo)
 	familyCtrl := FamilyController.NewFamilyControllerImpl(familyServ)
 
+	//citizen
+	citizenRepo := CitizenRepository.NewCitizenRepository(mysqlClient)
+	citizenServ := CitizenService.NewCitizenService(citizenRepo, &configJWT, familyRepo)
+	citizenCtrl := CitizenController.NewCitizenController(citizenServ)
+
+	//vaccine
+	vaccineRepo := VaccineRepository.NewVaccineRepository(mysqlClient)
+	vaccineServ := VaccineService.NewVaccineRepository(vaccineRepo)
+	vaccineCtrl := VaccineController.NewVaccineController(vaccineServ)
+
 	routesInit := routes.ControllerList{
 		JWTMiddleware:     configJWT.Init(),
 		CitizenController: citizenCtrl,
 		HealthController:  healthCtrl,
 		FamilyController:  familyCtrl,
+		VaccineController: vaccineCtrl,
 	}
 	routesInit.Registration(e)
 	if err := e.Start(":8080"); err != http.ErrServerClosed {
