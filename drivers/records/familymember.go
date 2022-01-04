@@ -7,12 +7,14 @@ import (
 
 type FamilyMember struct {
 	gorm.Model
-	Id        int    `gorm:"not null, primary_key, autoIncrement"`
-	Name      string `gorm:"not null"`
-	Birthday  time.Time
-	Nik       string `gorm:"not null"`
-	Gender    string `gorm:"not null"`
-	Age       int    `gorm:"not null"`
-	Handphone string `gorm:"not null"`
-	CitizenId int
+	Id                   int    `gorm:"not null;primary_key;autoIncrement"`
+	Name                 string `gorm:"not null"`
+	Birthday             time.Time
+	Nik                  string `gorm:"not null"`
+	Gender               string `gorm:"not null"`
+	Age                  int    `gorm:"not null"`
+	Handphone            string `gorm:"not null"`
+	CitizenId            int
+	Address              string
+	VaccineSessionDetail VaccineSessionDetail `gorm:"foreignKey:FamilyMemberId;"`
 }

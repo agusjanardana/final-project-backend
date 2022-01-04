@@ -10,11 +10,13 @@ import (
 	middleware2 "vaccine-app-be/app/middleware"
 	"vaccine-app-be/drivers/records"
 	"vaccine-app-be/drivers/repository/CitizenRepository/mocks"
+	familyMock "vaccine-app-be/drivers/repository/FamilyRepository/mocks"
 	"vaccine-app-be/utilities"
 )
 
 var (
 	citizenRepository mocks.CitizenRepository
+	familyRepository  familyMock.FamilyRepository
 	jwtAuth           *middleware2.ConfigJWT
 	service           CitizenService
 )
@@ -24,7 +26,7 @@ func setup() CitizenService {
 		SecretJWT: "testmock123",
 		ExpiredIn: 2,
 	}
-	citizenService := NewCitizenService(&citizenRepository, jwtAuth)
+	citizenService := NewCitizenService(&citizenRepository, jwtAuth, &familyRepository)
 
 	return citizenService
 }
@@ -45,6 +47,7 @@ func TestRegister(t *testing.T) {
 		}
 		citizenRepository.On("FindByEmail", mock.Anything, mock.AnythingOfType("string")).Return(records.Citizen{}, nil).Once()
 		citizenRepository.On("Register", mock.Anything, mock.Anything).Return(expectedReturn, nil).Once()
+		familyRepository.On("Create", mock.Anything, mock.Anything).Return(records.FamilyMember{}, nil).Once()
 
 		actualResult, err := CitizenService.Register(context.Background(), domain)
 		assert.Nil(t, err)

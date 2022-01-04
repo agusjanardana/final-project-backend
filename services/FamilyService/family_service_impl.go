@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/jinzhu/copier"
-	"log"
 	"vaccine-app-be/drivers/records"
 	"vaccine-app-be/drivers/repository/FamilyRepository"
 )
@@ -81,7 +80,6 @@ func (service *FamilyServiceImpl) Update(ctx context.Context, id int, family Fam
 
 	request := new(records.FamilyMember)
 	copier.Copy(request, &family)
-	log.Println(request)
 	update, err := service.FamilyRepository.Update(ctx, id, *request)
 	if err != nil {
 		return FamilyMember{}, err

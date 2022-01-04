@@ -3,7 +3,8 @@ package CitizenService
 import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
-	"gopkg.in/guregu/null.v4"
+	"time"
+	"vaccine-app-be/drivers/records"
 )
 
 type Citizen struct {
@@ -16,7 +17,22 @@ type Citizen struct {
 	HandphoneNumber string
 	VaccinePass     string
 	StatusVaccines  string
-	Birthday        null.Time
+	Age             int
+	Gender          string
+	Birthday        time.Time
+}
+
+func (c *Citizen) ToRecordFamily() records.FamilyMember {
+	recordFamily := records.FamilyMember{
+		Name:                 c.Name,
+		Birthday:             c.Birthday,
+		Nik:                  c.NIK,
+		Gender:               c.Gender,
+		Age:                  c.Age,
+		Handphone:            c.HandphoneNumber,
+		CitizenId:            c.Id,
+	}
+	return recordFamily
 }
 
 func (citizen Citizen) Validate() error {
