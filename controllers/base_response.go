@@ -32,6 +32,14 @@ func ForbiddenRequest(c echo.Context, error int, err error) error {
 	return c.JSON(http.StatusForbidden, response)
 }
 
+func InternalServerError(c echo.Context, error int, err error) error {
+	response := BaseReponses{}
+	response.Meta.Status = error
+	response.Meta.Message = "internal server error"
+
+	return c.JSON(http.StatusInternalServerError, response)
+}
+
 func BadRequestResponse(c echo.Context, error int, err error) error {
 	response := BaseReponses{}
 	response.Meta.Status = error

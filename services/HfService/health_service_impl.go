@@ -25,12 +25,12 @@ func NewHealthService(HealthRepository HealthRepository.HealthRepository, jwtAut
 
 func (service *HealthServiceImpl) Register(ctx context.Context, healthF HealthFacilitator) (HealthFacilitator, error) {
 	err := healthF.Validate()
-	if err != nil{
+	if err != nil {
 		return healthF, err
 	}
 
 	email, err := service.HealthRepository.FindByEmail(ctx, healthF.Email)
-	if err != nil && !errors.Is(err,gorm.ErrRecordNotFound) {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return HealthFacilitator{}, err
 	}
 
@@ -58,8 +58,8 @@ func (service *HealthServiceImpl) Register(ctx context.Context, healthF HealthFa
 }
 
 func (service *HealthServiceImpl) Login(ctx context.Context, email, password string) (string, error) {
-	if len(email) == 0 || len(password) == 0{
-		return "" , errors.New("email or password blank")
+	if len(email) == 0 || len(password) == 0 {
+		return "", errors.New("email or password blank")
 	}
 
 	byEmail, err := service.HealthRepository.FindByEmail(ctx, email)
@@ -67,9 +67,21 @@ func (service *HealthServiceImpl) Login(ctx context.Context, email, password str
 		return "", err
 	}
 	matchPassword := utilities.CheckPasswordHash(password, byEmail.Password)
-	if !matchPassword{
+	if !matchPassword {
 		return "", errors.New("password doesn't match")
 	}
 	jwt := service.jwtAuth.GenerateToken(byEmail.Id, byEmail.Name, byEmail.Role)
 	return jwt, nil
+}
+
+func (service *HealthServiceImpl) GetAllHealthFacilitator(ctx context.Context) ([]HealthFacilitator, error) {
+	facilitator, err := service.HealthRepository.GetAllHealthFacilitator(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var response []HealthFacilitator
+	copier.Copy(&response, &facilitator)
+
+	return response, nil
 }

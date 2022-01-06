@@ -68,14 +68,17 @@ func (service *FamilyServiceImpl) GetCitizenOwnFamily(ctx context.Context, citiz
 	return response, nil
 }
 
-func (service *FamilyServiceImpl) Update(ctx context.Context, id int, family FamilyMember) (FamilyMember, error) {
+func (service *FamilyServiceImpl) Update(ctx context.Context, citizenId , id int, family FamilyMember) (FamilyMember, error) {
 	if len(string(rune(id))) == 0 {
 		return family, errors.New("id cannot be blank")
 	}
 
-	_, err := service.FamilyRepository.GetFamilyById(ctx, id)
+	data, err := service.FamilyRepository.GetFamilyById(ctx, id)
 	if err != nil {
 		return FamilyMember{}, err
+	}
+	if data.CitizenId != citizenId{
+		return FamilyMember{}, errors.New("this family doesn't belongs to you, cannot update")
 	}
 
 	request := new(records.FamilyMember)
