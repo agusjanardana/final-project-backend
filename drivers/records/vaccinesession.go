@@ -13,5 +13,7 @@ type VaccineSession struct {
 	Quota                int
 	SessionType          string
 	VaccineId            int
-	VaccineSessionDetail []VaccineSessionDetail `gorm:"foreignKey:SessionId;"`
+	HealthFacilitatorId  int
+	Status               string                 `gorm:"default:'AVAILABLE'"`
+	VaccineSessionDetail []VaccineSessionDetail `gorm:"foreignKey:SessionId;constraint:OnDelete:CASCADE;"`
 }

@@ -46,6 +46,7 @@ func (controller *FamilyControllerImpl) Update(c echo.Context) error {
 	ctx := c.Request().Context()
 	//get citizen ID
 	id := c.Param("id")
+	ctxId := middleware.GetUserId(c)
 	atoi, err := strconv.Atoi(id)
 	if err != nil {
 		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
@@ -57,7 +58,7 @@ func (controller *FamilyControllerImpl) Update(c echo.Context) error {
 	}
 	entityFamily := FamilyService.FamilyMember{}
 	copier.Copy(&entityFamily, &req)
-	update, err := controller.familyService.Update(ctx, atoi, entityFamily)
+	update, err := controller.familyService.Update(ctx, ctxId, atoi, entityFamily)
 	if err != nil {
 		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
 	}

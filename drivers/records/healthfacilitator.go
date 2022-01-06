@@ -10,9 +10,10 @@ type HealthFacilitator struct {
 	Password                  string `gorm:"not null"`
 	FacilitatorsCertification string
 	Address                   string
-	Longitude                 string    `gorm:"not null"`
-	Latitude                  string    `gorm:"not null"`
-	Type                      string    `gorm:"not null"`
-	Role                      string    `gorm:"default:'ADMIN'"`
-	Vaccine                   []Vaccine `gorm:"foreignKey:HealthFacilitatorId;"`
+	Longitude                 string           `gorm:"not null"`
+	Latitude                  string           `gorm:"not null"`
+	Type                      string           `gorm:"not null"`
+	Role                      string           `gorm:"default:'ADMIN'"`
+	Vaccine                   []Vaccine        `gorm:"foreignKey:HealthFacilitatorId;"`
+	VaccineSession            []VaccineSession `gorm:"foreignKey:HealthFacilitatorId;"`
 }

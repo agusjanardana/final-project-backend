@@ -136,6 +136,7 @@ func TestGetCitizenOwnFamily(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	FamilyService := setup()
 	t.Run("test case 1, success update data", func(t *testing.T) {
+		ctzId := 1
 		domain := FamilyMember{
 			Id:        1,
 			Name:      "Agus",
@@ -153,16 +154,18 @@ func TestUpdate(t *testing.T) {
 			Gender:    "Male",
 			Age:       15,
 			Handphone: "087523123123",
+			CitizenId: 1,
 		}
 		familyRepository.On("GetFamilyById", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturn, nil).Once()
 		familyRepository.On("Update", mock.Anything, mock.AnythingOfType("int"), mock.Anything).Return(expectedReturn, nil).Once()
 
-		update, err := FamilyService.Update(context.Background(), domain.Id, domain)
+		update, err := FamilyService.Update(context.Background(), ctzId, domain.Id, domain)
 		assert.Nil(t, err)
 		assert.Equal(t, update.Name, expectedReturn.Name)
 	})
 
 	t.Run("test case 2, data with that id not found", func(t *testing.T) {
+		ctzId := 1
 		domain := FamilyMember{
 			Id:        1,
 			Name:      "Agus",
@@ -174,7 +177,7 @@ func TestUpdate(t *testing.T) {
 		}
 		err2 := errors.New("data not found")
 		familyRepository.On("GetFamilyById", mock.Anything, mock.AnythingOfType("int")).Return(records.FamilyMember{}, err2).Once()
-		_, err := FamilyService.Update(context.Background(), domain.Id, domain)
+		_, err := FamilyService.Update(context.Background(), ctzId, domain.Id, domain)
 		assert.Equal(t, err, err2)
 	})
 }
@@ -195,7 +198,7 @@ func TestDelete(t *testing.T) {
 			CitizenId: 1,
 		}
 		familyRepository.On("GetFamilyById", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturn, nil).Once()
-		familyRepository.On("Delete", mock.Anything,mock.AnythingOfType("int"), mock.AnythingOfType("int")).Return(records.FamilyMember{}, nil).Once()
+		familyRepository.On("Delete", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("int")).Return(records.FamilyMember{}, nil).Once()
 
 		s, err := FamilyService.Delete(context.Background(), familyId, citizenId)
 		assert.Nil(t, err)
