@@ -5,15 +5,17 @@ import (
 	"errors"
 	"github.com/jinzhu/copier"
 	"vaccine-app-be/drivers/records"
+	"vaccine-app-be/drivers/repository/VaccineRepository"
 	"vaccine-app-be/drivers/repository/VaccineSessionRepository"
 )
 
 type VaccineSessionServiceImpl struct {
 	vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository
+	vaccineRepository        VaccineRepository.VaccineRepository
 }
 
-func NewSessionService(vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository) VaccineSessionService {
-	return &VaccineSessionServiceImpl{vaccineSessionRepository: vaccineSessionRepository}
+func NewSessionService(vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository, vaccineRepository VaccineRepository.VaccineRepository) VaccineSessionService {
+	return &VaccineSessionServiceImpl{vaccineSessionRepository: vaccineSessionRepository, vaccineRepository: vaccineRepository}
 }
 
 func (service *VaccineSessionServiceImpl) CreateSession(ctx context.Context, domain VaccineSession) (VaccineSession, error) {
@@ -24,14 +26,31 @@ func (service *VaccineSessionServiceImpl) CreateSession(ctx context.Context, dom
 
 	entitySession := records.VaccineSession{}
 	copier.Copy(&entitySession, domain)
-	data, err := service.vaccineSessionRepository.Create(ctx, entitySession)
+	vaccineData, err := service.vaccineRepository.FindVaccineById(ctx, domain.VaccineId)
 	if err != nil {
 		return VaccineSession{}, err
 	}
-	response := VaccineSession{}
-	copier.Copy(&response, &data)
 
-	return response, nil
+	if domain.Quota > vaccineData.Stock {
+		return VaccineSession{}, errors.New("vaccine stocks could not meet demand")
+	} else {
+		data, err := service.vaccineSessionRepository.Create(ctx, entitySession)
+		if err != nil {
+			return VaccineSession{}, err
+		}
+
+		//kurangi jumlah stock di DB untuk data realtime.
+		entityVaccine := records.Vaccine{}
+		entityVaccine.Stock = vaccineData.Stock - data.Quota
+		_ , err = service.vaccineRepository.Update(ctx, vaccineData.HealthFacilitatorId, domain.VaccineId, entityVaccine)
+		if err != nil {
+			return VaccineSession{}, err
+		}
+		response := VaccineSession{}
+		copier.Copy(&response, &data)
+
+		return response, nil
+	}
 }
 
 func (service *VaccineSessionServiceImpl) GetSessionById(ctx context.Context, id int) (VaccineSession, error) {
@@ -65,7 +84,7 @@ func (service *VaccineSessionServiceImpl) DeleteSession(ctx context.Context, hfi
 		return "", errors.New("data not found")
 	}
 
-	if byId.HealthFacilitatorId == hfid{
+	if byId.HealthFacilitatorId == hfid {
 		_, err = service.vaccineSessionRepository.Delete(ctx, id, hfid)
 		if err != nil {
 			return "", err
@@ -87,7 +106,7 @@ func (service *VaccineSessionServiceImpl) UpdateSession(ctx context.Context, hfi
 		return VaccineSession{}, err
 	}
 
-	if byId.HealthFacilitatorId == hfid{
+	if byId.HealthFacilitatorId == hfid {
 		entitySession := records.VaccineSession{}
 		copier.Copy(&entitySession, domain)
 		update, err := service.vaccineSessionRepository.Update(ctx, id, hfid, entitySession)

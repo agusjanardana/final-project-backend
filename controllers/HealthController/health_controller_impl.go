@@ -13,6 +13,7 @@ type HealthFacilitatorCtrlImpl struct {
 	healthService HfService.HealthService
 }
 
+
 func NewHealthFacilitatorsController(healthFacilitator HfService.HealthService) HealthFacilitatorController {
 	return &HealthFacilitatorCtrlImpl{healthService: healthFacilitator}
 }
@@ -51,10 +52,23 @@ func (controller *HealthFacilitatorCtrlImpl) Login(c echo.Context) error {
 
 	login, err := controller.healthService.Login(ctx, req.Email, req.Password)
 	if err != nil {
-		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
+		return controllers.InternalServerError(c, http.StatusInternalServerError, err)
 	}
 
 	return controllers.NewSuccessResponse(c, echo.Map{
 		"token" : login,
 	})
+}
+
+func (controller *HealthFacilitatorCtrlImpl) GetAllHealthFacilitator(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	facilitator, err := controller.healthService.GetAllHealthFacilitator(ctx)
+	if err != nil {
+		return controllers.InternalServerError(c, http.StatusInternalServerError, err)
+	}
+
+	var response []web.HealthFacilitator
+	copier.Copy(&response, &facilitator)
+	return controllers.NewSuccessResponse(c, response)
 }

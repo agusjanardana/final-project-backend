@@ -100,9 +100,21 @@ func (service *CitizenServiceImpl) Update(ctx context.Context, userId int, birth
 	if err != nil {
 		return Citizen{}, err
 	}
-	_ , err = service.FamilyRepository.Update(ctx, data[0].Id, record)
+	_, err = service.FamilyRepository.Update(ctx, data[0].Id, record)
 	if err != nil {
 		return Citizen{}, err
 	}
 	return entity, nil
+}
+
+func (service *CitizenServiceImpl) CitizenFindById(ctx context.Context, userId int) (Citizen, error) {
+	citizenData, err := service.CitizenRepository.FindById(ctx, userId)
+	if err != nil {
+		return Citizen{}, err
+	}
+
+	entityCitizenRespond := Citizen{}
+	copier.Copy(&entityCitizenRespond, &citizenData)
+
+	return entityCitizenRespond, nil
 }

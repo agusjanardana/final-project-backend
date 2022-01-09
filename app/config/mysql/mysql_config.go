@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"vaccine-app-be/app/config"
-	"vaccine-app-be/drivers/records"
 	"vaccine-app-be/exceptions"
 )
 
@@ -21,7 +20,7 @@ func New(configuration config.Config) Client {
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	exceptions.PanicIfError(err)
 
-	err = db.AutoMigrate(records.Citizen{}, records.HealthFacilitator{}, records.FamilyMember{}, records.Vaccine{}, records.VaccineSession{}, records.VaccineSessionDetail{})
+	//err = db.AutoMigrate(records.Citizen{}, records.HealthFacilitator{}, records.FamilyMember{}, records.Vaccine{}, records.VaccineSession{}, records.VaccineSessionDetail{})
 	exceptions.PanicIfError(err)
 	log.Println("MySql Connected")
 	return &client{db}

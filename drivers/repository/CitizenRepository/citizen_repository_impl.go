@@ -2,6 +2,7 @@ package CitizenRepository
 
 import (
 	"context"
+	"errors"
 	"time"
 	"vaccine-app-be/app/config/mysql"
 	"vaccine-app-be/drivers/records"
@@ -13,7 +14,6 @@ type CitizenRepositoryImpl struct {
 
 func NewCitizenRepository(client mysql.Client) CitizenRepository {
 	return &CitizenRepositoryImpl{client}
-
 }
 
 func (repository *CitizenRepositoryImpl) Register(ctx context.Context, citizens records.Citizen) (records.Citizen, error) {
@@ -43,6 +43,15 @@ func (repository *CitizenRepositoryImpl) Update(ctx context.Context, userId int,
 	err = repository.client.Conn().WithContext(ctx).Where("id = ?", userId).Updates(&citizen).Error
 	if err != nil {
 		return records.Citizen{}, err
+	}
+	return citizen, nil
+}
+
+func (repository *CitizenRepositoryImpl) FindById(ctx context.Context, citizenId int) (records.Citizen, error) {
+	citizen := records.Citizen{}
+	data := repository.client.Conn().WithContext(ctx).Where("id = ?", citizenId).Debug().Find(&citizen)
+	if data.RowsAffected == 0 {
+		return citizen, errors.New("data not found")
 	}
 	return citizen, nil
 }
