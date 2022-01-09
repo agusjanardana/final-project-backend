@@ -37,6 +37,27 @@ func (_m *CitizenRepository) FindByEmail(ctx context.Context, email string) (rec
 	return r0, r1
 }
 
+// FindById provides a mock function with given fields: ctx, citizenId
+func (_m *CitizenRepository) FindById(ctx context.Context, citizenId int) (records.Citizen, error) {
+	ret := _m.Called(ctx, citizenId)
+
+	var r0 records.Citizen
+	if rf, ok := ret.Get(0).(func(context.Context, int) records.Citizen); ok {
+		r0 = rf(ctx, citizenId)
+	} else {
+		r0 = ret.Get(0).(records.Citizen)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, int) error); ok {
+		r1 = rf(ctx, citizenId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Register provides a mock function with given fields: ctx, citizens
 func (_m *CitizenRepository) Register(ctx context.Context, citizens records.Citizen) (records.Citizen, error) {
 	ret := _m.Called(ctx, citizens)

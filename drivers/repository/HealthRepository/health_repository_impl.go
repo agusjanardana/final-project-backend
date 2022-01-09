@@ -2,7 +2,6 @@ package HealthRepository
 
 import (
 	"context"
-	"gorm.io/gorm/clause"
 	"vaccine-app-be/app/config/mysql"
 	"vaccine-app-be/drivers/records"
 )
@@ -34,7 +33,7 @@ func (repository *HealthRepositoryImpl) FindByEmail(ctx context.Context, email s
 
 func (repository *HealthRepositoryImpl) GetAllHealthFacilitator(ctx context.Context) ([]records.HealthFacilitator, error) {
 	var record []records.HealthFacilitator
-	err := repository.client.Conn().WithContext(ctx).Preload(clause.Associations).Find(&record).Debug().Error
+	err := repository.client.Conn().WithContext(ctx).Preload("Vaccine.VaccineSession").Preload("VaccineSession.VaccineSessionDetail").Preload("VaccineSession").Find(&record).Debug().Error
 	if err != nil {
 		return record, err
 	}

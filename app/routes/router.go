@@ -7,6 +7,7 @@ import (
 	"vaccine-app-be/controllers/FamilyController"
 	"vaccine-app-be/controllers/HealthController"
 	"vaccine-app-be/controllers/VaccineController"
+	"vaccine-app-be/controllers/VaccineDetailController"
 	"vaccine-app-be/controllers/VaccineSessionController"
 )
 
@@ -17,6 +18,7 @@ type ControllerList struct {
 	FamilyController         FamilyController.FamilyController
 	VaccineController        VaccineController.VaccineController
 	VaccineSessionController VaccineSessionController.VaccineSessionController
+	VaccineDetailController  VaccineDetailController.VaccineDetailController
 }
 
 func (c1 *ControllerList) Registration(e *echo.Echo) {
@@ -26,10 +28,12 @@ func (c1 *ControllerList) Registration(e *echo.Echo) {
 	apiV1.POST("/citizen/registers", c1.CitizenController.Register)
 	apiV1.POST("/citizen/logins", c1.CitizenController.Login)
 	apiV1.PUT("/citizens", c1.CitizenController.Update, middleware.JWTWithConfig(c1.JWTMiddleware))
+	apiV1.GET("/citizen/profiles", c1.CitizenController.FindCitizenById, middleware.JWTWithConfig(c1.JWTMiddleware))
 
 	//	HEALTH FA THINGS
 	apiV1.POST("/admin/registers", c1.HealthController.Register)
 	apiV1.POST("/admin/logins", c1.HealthController.Login)
+	apiV1.GET("/admins", c1.HealthController.GetAllHealthFacilitator)
 
 	//  FAMILY THINGS
 	apiV1.GET("/families/:id", c1.FamilyController.GetFamilyById, middleware.JWTWithConfig(c1.JWTMiddleware))
@@ -52,4 +56,7 @@ func (c1 *ControllerList) Registration(e *echo.Echo) {
 	apiV1.DELETE("/vaccine/session/:id", c1.VaccineSessionController.DeleteSession, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.PUT("/vaccine/session/:id", c1.VaccineSessionController.UpdateSession, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.GET("/vaccine/sessions", c1.VaccineSessionController.GetAllVaccineSession, middleware.JWTWithConfig(c1.JWTMiddleware))
+
+	// Booking Session
+	apiV1.POST("/session/bookings/:id", c1.VaccineDetailController.CitizenChooseSession, middleware.JWTWithConfig(c1.JWTMiddleware))
 }

@@ -16,16 +16,19 @@ import (
 	"vaccine-app-be/controllers/FamilyController"
 	"vaccine-app-be/controllers/HealthController"
 	"vaccine-app-be/controllers/VaccineController"
+	"vaccine-app-be/controllers/VaccineDetailController"
 	"vaccine-app-be/controllers/VaccineSessionController"
 	"vaccine-app-be/drivers/repository/CitizenRepository"
 	"vaccine-app-be/drivers/repository/FamilyRepository"
 	"vaccine-app-be/drivers/repository/HealthRepository"
 	"vaccine-app-be/drivers/repository/VaccineRepository"
+	"vaccine-app-be/drivers/repository/VaccineSessionDetailRepository"
 	"vaccine-app-be/drivers/repository/VaccineSessionRepository"
 	"vaccine-app-be/exceptions"
 	"vaccine-app-be/services/CitizenService"
 	"vaccine-app-be/services/FamilyService"
 	"vaccine-app-be/services/HfService"
+	"vaccine-app-be/services/SessionDetailService"
 	"vaccine-app-be/services/VaccineService"
 	"vaccine-app-be/services/VaccineSessionService"
 )
@@ -81,8 +84,13 @@ func main() {
 
 	//session
 	sessionRepo := VaccineSessionRepository.NewVaccineSessionRepository(mysqlClient)
-	sessionServ := VaccineSessionService.NewSessionService(sessionRepo)
+	sessionServ := VaccineSessionService.NewSessionService(sessionRepo, vaccineRepo)
 	sessionCtrl := VaccineSessionController.NewVaccineSessionController(sessionServ)
+
+	//detail
+	detailRepo := VaccineSessionDetailRepository.NewSessionDetail(mysqlClient)
+	detailServ := SessionDetailService.NewSessionDetail(detailRepo, familyRepo, sessionRepo)
+	detailCtrl := VaccineDetailController.NewSessionDetailController(detailServ)
 
 	routesInit := routes.ControllerList{
 		JWTMiddleware:            configJWT.Init(),
@@ -91,6 +99,7 @@ func main() {
 		FamilyController:         familyCtrl,
 		VaccineController:        vaccineCtrl,
 		VaccineSessionController: sessionCtrl,
+		VaccineDetailController:  detailCtrl,
 	}
 	routesInit.Registration(e)
 	if err := e.Start(":8080"); err != http.ErrServerClosed {

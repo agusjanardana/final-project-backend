@@ -68,10 +68,24 @@ func (citizenCtrl *CitizenControllerImpl) Update(c echo.Context) error {
 	}
 	update, err := citizenCtrl.citizenService.Update(ctx, ctxCitizenId, req.Birthday, req.Address)
 	if err != nil {
-		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
+		return controllers.InternalServerError(c, http.StatusInternalServerError, err)
 	}
 	entity := web.CitizenUpdateResponse{}
 	copier.Copy(&entity, &update)
 
 	return controllers.NewSuccessResponse(c, entity)
+}
+
+func (citizenCtrl *CitizenControllerImpl) FindCitizenById(c echo.Context) error {
+	ctx := c.Request().Context()
+	ctxCitizenId := middleware.GetUserId(c)
+
+	citizenData, err := citizenCtrl.citizenService.CitizenFindById(ctx, ctxCitizenId)
+	if err != nil {
+		return controllers.InternalServerError(c, http.StatusInternalServerError, err)
+	}
+	response := web.RespondFind{}
+	copier.Copy(&response, &citizenData)
+
+	return controllers.NewSuccessResponse(c, response)
 }
