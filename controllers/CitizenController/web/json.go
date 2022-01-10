@@ -42,12 +42,18 @@ type CitizenUpdateResponse struct {
 }
 
 type RespondFind struct {
-	Name            string    `json:"name"`
-	Email           string    `json:"email"`
-	NIK             string    `json:"nik"`
-	HandphoneNumber string    `json:"handphone_number"`
-	Age             int       `json:"age"`
-	Gender          string    `json:"gender"`
-	Birthday        time.Time `json:"birthday"`
-	Address         string    `json:"address"`
+	Name            string         `json:"name"`
+	Email           string         `json:"email"`
+	NIK             string         `json:"nik"`
+	HandphoneNumber string         `json:"handphone_number"`
+	Age             int            `json:"age"`
+	Gender          string         `json:"gender"`
+	Birthday        time.Time      `json:"birthday"`
+	Address         string         `json:"address"`
+	FamilyMember    []FamilyMember `json:"citizen_family"`
+}
+
+type FamilyMember struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }

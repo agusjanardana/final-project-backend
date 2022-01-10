@@ -9,4 +9,5 @@ type VaccineSessionService interface {
 	DeleteSession(ctx context.Context, hfid, id int) (string, error)
 	UpdateSession(ctx context.Context, hfid, id int, domain VaccineSession) (VaccineSession, error)
 	GetAllVaccineSession(ctx context.Context)([]VaccineSession, error)
+	GetCitizenAndFamilySelectedSession(ctx context.Context, citizenId int) (VaccineSession, error)
 }

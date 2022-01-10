@@ -112,9 +112,8 @@ func (service *CitizenServiceImpl) CitizenFindById(ctx context.Context, userId i
 	if err != nil {
 		return Citizen{}, err
 	}
-
 	entityCitizenRespond := Citizen{}
 	copier.Copy(&entityCitizenRespond, &citizenData)
-
 	return entityCitizenRespond, nil
 }
+

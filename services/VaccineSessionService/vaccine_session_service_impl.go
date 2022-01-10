@@ -5,6 +5,8 @@ import (
 	"errors"
 	"github.com/jinzhu/copier"
 	"vaccine-app-be/drivers/records"
+	"vaccine-app-be/drivers/repository/CitizenRepository"
+	"vaccine-app-be/drivers/repository/FamilyRepository"
 	"vaccine-app-be/drivers/repository/VaccineRepository"
 	"vaccine-app-be/drivers/repository/VaccineSessionRepository"
 )
@@ -12,10 +14,12 @@ import (
 type VaccineSessionServiceImpl struct {
 	vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository
 	vaccineRepository        VaccineRepository.VaccineRepository
+	FamilyRepository         FamilyRepository.FamilyRepository
+	CitizenRepository        CitizenRepository.CitizenRepository
 }
 
-func NewSessionService(vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository, vaccineRepository VaccineRepository.VaccineRepository) VaccineSessionService {
-	return &VaccineSessionServiceImpl{vaccineSessionRepository: vaccineSessionRepository, vaccineRepository: vaccineRepository}
+func NewSessionService(vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository, vaccineRepository VaccineRepository.VaccineRepository, FamilyRepository FamilyRepository.FamilyRepository, CitizenRepository CitizenRepository.CitizenRepository) VaccineSessionService {
+	return &VaccineSessionServiceImpl{vaccineSessionRepository: vaccineSessionRepository, vaccineRepository: vaccineRepository, FamilyRepository: FamilyRepository, CitizenRepository: CitizenRepository}
 }
 
 func (service *VaccineSessionServiceImpl) CreateSession(ctx context.Context, domain VaccineSession) (VaccineSession, error) {
@@ -42,7 +46,7 @@ func (service *VaccineSessionServiceImpl) CreateSession(ctx context.Context, dom
 		//kurangi jumlah stock di DB untuk data realtime.
 		entityVaccine := records.Vaccine{}
 		entityVaccine.Stock = vaccineData.Stock - data.Quota
-		_ , err = service.vaccineRepository.Update(ctx, vaccineData.HealthFacilitatorId, domain.VaccineId, entityVaccine)
+		_, err = service.vaccineRepository.Update(ctx, vaccineData.HealthFacilitatorId, domain.VaccineId, entityVaccine)
 		if err != nil {
 			return VaccineSession{}, err
 		}
@@ -131,6 +135,33 @@ func (service *VaccineSessionServiceImpl) GetAllVaccineSession(ctx context.Conte
 
 	var response []VaccineSession
 	copier.Copy(&response, &session)
+
+	return response, nil
+}
+
+func (service *VaccineSessionServiceImpl) GetCitizenAndFamilySelectedSession(ctx context.Context, citizenId int) (VaccineSession, error) {
+	citizenData, err := service.CitizenRepository.FindById(ctx, citizenId)
+	if err != nil {
+		return VaccineSession{}, err
+	}
+
+	familyData, err := service.FamilyRepository.GetCitizenOwnFamily(ctx, citizenData.Id)
+	if err != nil {
+		return VaccineSession{}, err
+	}
+
+	sessionId := familyData[0].VaccineSessionDetail.SessionId
+	if sessionId == 0 {
+		return VaccineSession{}, errors.New("this citizen and family not selected any vaccine session")
+	}
+
+	data, err := service.vaccineSessionRepository.FindById(ctx, sessionId)
+	if err != nil {
+		return VaccineSession{}, err
+	}
+
+	response := VaccineSession{}
+	copier.Copy(&response, &data)
 
 	return response, nil
 }

@@ -84,7 +84,7 @@ func main() {
 
 	//session
 	sessionRepo := VaccineSessionRepository.NewVaccineSessionRepository(mysqlClient)
-	sessionServ := VaccineSessionService.NewSessionService(sessionRepo, vaccineRepo)
+	sessionServ := VaccineSessionService.NewSessionService(sessionRepo, vaccineRepo, familyRepo, citizenRepo)
 	sessionCtrl := VaccineSessionController.NewVaccineSessionController(sessionServ)
 
 	//detail

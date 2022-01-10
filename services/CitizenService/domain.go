@@ -20,17 +20,23 @@ type Citizen struct {
 	Age             int
 	Gender          string
 	Birthday        time.Time
+	FamilyMember   []FamilyMember
+}
+
+type FamilyMember struct {
+	Id   int
+	Name string
 }
 
 func (c *Citizen) ToRecordFamily() records.FamilyMember {
 	recordFamily := records.FamilyMember{
-		Name:                 c.Name,
-		Birthday:             c.Birthday,
-		Nik:                  c.NIK,
-		Gender:               c.Gender,
-		Age:                  c.Age,
-		Handphone:            c.HandphoneNumber,
-		CitizenId:            c.Id,
+		Name:      c.Name,
+		Birthday:  c.Birthday,
+		Nik:       c.NIK,
+		Gender:    c.Gender,
+		Age:       c.Age,
+		Handphone: c.HandphoneNumber,
+		CitizenId: c.Id,
 	}
 	return recordFamily
 }

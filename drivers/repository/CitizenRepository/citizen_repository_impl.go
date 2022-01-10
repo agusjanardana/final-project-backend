@@ -49,7 +49,7 @@ func (repository *CitizenRepositoryImpl) Update(ctx context.Context, userId int,
 
 func (repository *CitizenRepositoryImpl) FindById(ctx context.Context, citizenId int) (records.Citizen, error) {
 	citizen := records.Citizen{}
-	data := repository.client.Conn().WithContext(ctx).Where("id = ?", citizenId).Debug().Find(&citizen)
+	data := repository.client.Conn().WithContext(ctx).Where("id = ?", citizenId).Preload("FamilyMember").Debug().Find(&citizen)
 	if data.RowsAffected == 0 {
 		return citizen, errors.New("data not found")
 	}

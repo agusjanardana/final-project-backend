@@ -134,3 +134,21 @@ func (controller *VaccineSessionControllerImpl) GetAllVaccineSession(c echo.Cont
 
 	return controllers.NewSuccessResponse(c, response)
 }
+
+func (controller *VaccineSessionControllerImpl) GetCitizenAndFamilySelectedSession(c echo.Context) error {
+	ctx := c.Request().Context()
+	ctxCitizenId := middleware.GetUserId(c)
+
+	sessionData, err := controller.vaccineSessionService.GetCitizenAndFamilySelectedSession(ctx, ctxCitizenId)
+	if err != nil {
+		return controllers.BadRequestResponse(c, http.StatusInternalServerError, err)
+	}
+	response := web.VaccineSessionCreateResponse{}
+	copier.Copy(&response, &sessionData)
+
+	citizenIdString := strconv.Itoa(ctxCitizenId)
+	return controllers.NewSuccessResponse(c, echo.Map{
+		"message": "Citizen id " + citizenIdString + " with his family selected this session",
+		"session": response,
+	})
+}
