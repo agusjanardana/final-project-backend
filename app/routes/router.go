@@ -29,6 +29,7 @@ func (c1 *ControllerList) Registration(e *echo.Echo) {
 	apiV1.POST("/citizen/logins", c1.CitizenController.Login)
 	apiV1.PUT("/citizens", c1.CitizenController.Update, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.GET("/citizen/profiles", c1.CitizenController.FindCitizenById, middleware.JWTWithConfig(c1.JWTMiddleware))
+	apiV1.GET("/citizen/sessions", c1.VaccineSessionController.GetCitizenAndFamilySelectedSession, middleware.JWTWithConfig(c1.JWTMiddleware))
 
 	//	HEALTH FA THINGS
 	apiV1.POST("/admin/registers", c1.HealthController.Register)

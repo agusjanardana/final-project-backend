@@ -34,7 +34,7 @@ func (repository *FamilyRepositoryImpl) GetFamilyById(ctx context.Context, id in
 
 func (repository *FamilyRepositoryImpl) GetCitizenOwnFamily(ctx context.Context, citizenId int) ([]records.FamilyMember, error) {
 	var familyRecord []records.FamilyMember
-	data := repository.client.Conn().Debug().WithContext(ctx).Where("citizen_id = ?", citizenId).Find(&familyRecord)
+	data := repository.client.Conn().Debug().WithContext(ctx).Preload("VaccineSessionDetail").Where("citizen_id = ?", citizenId).Find(&familyRecord)
 	if data.RowsAffected == 0 {
 		return familyRecord, errors.New("data not found")
 	}

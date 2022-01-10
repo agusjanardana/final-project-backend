@@ -9,4 +9,5 @@ type VaccineSessionController interface {
 	DeleteSession(c echo.Context) error
 	UpdateSession(c echo.Context) error
 	GetAllVaccineSession(c echo.Context) error
+	GetCitizenAndFamilySelectedSession(c echo.Context) error
 }
