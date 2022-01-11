@@ -85,3 +85,15 @@ func (service *HealthServiceImpl) GetAllHealthFacilitator(ctx context.Context) (
 
 	return response, nil
 }
+
+func (service *HealthServiceImpl) FindById(ctx context.Context, hfId int) (HealthFacilitator, error) {
+	dataFacilitators, err := service.HealthRepository.FindById(ctx, hfId)
+	if err != nil {
+		return HealthFacilitator{}, err
+	}
+	response := HealthFacilitator{}
+	copier.Copy(&response, &dataFacilitators)
+
+	return response, nil
+}
+

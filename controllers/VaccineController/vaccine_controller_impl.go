@@ -128,12 +128,18 @@ func (controller *VaccineControllerImpl) FindVaccineById(c echo.Context) error {
 func (controller *VaccineControllerImpl) FindVaccineOwnedByHF(c echo.Context) error {
 	ctx := c.Request().Context()
 	ctxRole := middleware.GetUserRoles(c)
-	ctxHfId := middleware.GetUserId(c)
+	//ctxHfId := middleware.GetUserId(c)
 	if ctxRole != "ADMIN" {
 		return controllers.ForbiddenRequest(c, http.StatusForbidden, errors.New("doesn't have access"))
 	}
 
-	hf, err := controller.vaccineService.FindVaccineOwnedByHF(ctx, ctxHfId)
+	idParam := c.Param("id")
+	dataToInteger, err := strconv.Atoi(idParam)
+	if err != nil {
+		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
+	}
+
+	hf, err := controller.vaccineService.FindVaccineOwnedByHF(ctx, dataToInteger)
 	if err != nil {
 		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
 	}
