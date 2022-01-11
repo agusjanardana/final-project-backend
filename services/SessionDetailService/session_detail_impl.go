@@ -35,6 +35,10 @@ func (service *SessionDetailImpl) CitizenChooseSession(ctx context.Context, citi
 		return nil, errors.New("session doesn't exist")
 	}
 
+	if dataSession.Quota == 0{
+		return nil, errors.New("session quota is full")
+	}
+
 	detailData, _ := service.sessionDetail.GetDetailBySessionId(ctx, sessionId)
 	countSessionData := len(detailData)
 
@@ -51,6 +55,7 @@ func (service *SessionDetailImpl) CitizenChooseSession(ctx context.Context, citi
 			data[i].SessionId = create.SessionId
 			data[i].FamilyMemberId = create.FamilyMemberId
 		}
+
 
 		//kurangi jumlah quota di DB untuk data realtime.
 		entitySession := records.VaccineSession{}

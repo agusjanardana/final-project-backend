@@ -125,3 +125,25 @@ func TestLogin(t *testing.T) {
 		assert.Equal(t, err, errors.New("password doesn't match"))
 	})
 }
+
+func TestGetAllHf(t *testing.T){
+	HealthService := setup()
+	t.Run("test case 1, success login", func(t *testing.T) {
+		expectedReturn := []records.HealthFacilitator{
+			{
+				Name: "RS A",
+				Address: "Jalan Kembang",
+			},
+			{
+				Name: "RS B",
+				Address: "Jalan Melayu",
+			},
+		}
+
+		healthRepository.On("GetAllHealthFacilitator", mock.Anything).Return(expectedReturn, nil).Once()
+
+		facilitatorData, err := HealthService.GetAllHealthFacilitator(context.Background())
+		assert.Nil(t, err)
+		assert.Equal(t, facilitatorData[0].Name, expectedReturn[0].Name)
+	})
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"log"
 	"testing"
+	"time"
 	middleware2 "vaccine-app-be/app/middleware"
 	"vaccine-app-be/drivers/records"
 	"vaccine-app-be/drivers/repository/CitizenRepository/mocks"
@@ -122,5 +123,75 @@ func TestLogin(t *testing.T) {
 
 		_, err := CitizenService.Login(context.Background(), result.Email, result.Password)
 		assert.Equal(t, err, errors.New("password doesn't match"))
+	})
+}
+
+func TestUpdate(t *testing.T) {
+	CitizenService := setup()
+	t.Run("test case 1, valid update", func(t *testing.T) {
+		ctxId := 1
+		birthdays := time.Now()
+		domain := Citizen{
+			Birthday: birthdays,
+			Address:  "jalan",
+		}
+
+		expectedReturn := records.Citizen{Address: "jalan"}
+		expectedReturn.Birthday.Scan(birthdays)
+
+		expectedReturnFamily := []records.FamilyMember{
+			{
+				Name: "Agus",
+				Age:  12,
+			},
+			{
+				Name: "Juna",
+				Age:  12,
+			},
+		}
+		expectedReturnEdit := records.FamilyMember{
+			Id:        0,
+			Name:      "Agus",
+			Birthday:  birthdays,
+			Nik:       "123123",
+			Gender:    "Male",
+			Age:       13,
+			Handphone: "123123123",
+			CitizenId: 1,
+		}
+
+		citizenRepository.On("Update", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("time.Time"), mock.AnythingOfType("string")).Return(expectedReturn, nil).Once()
+		familyRepository.On("GetCitizenOwnFamily", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturnFamily, nil).Once()
+		familyRepository.On("Update", mock.Anything, mock.AnythingOfType("int"), mock.Anything).Return(expectedReturnEdit, nil).Once()
+
+		updateData, err := CitizenService.Update(context.Background(), ctxId, domain.Birthday, domain.Address)
+		assert.Nil(t, err)
+		assert.Equal(t, updateData.Birthday, domain.Birthday)
+	})
+}
+
+func TestFindById(t *testing.T) {
+	CitizenService := setup()
+	t.Run("test case 1, valid find by id", func(t *testing.T) {
+		ctxId := 1
+		expectedReturn := records.Citizen{
+			Id:              1,
+			Name:            "agus",
+			Email:           "bjanardana@gmail.com",
+			Password:        "23123asdasd",
+			NIK:             "123123",
+			Address:         "jalan",
+			HandphoneNumber: "08123123123",
+			Gender:          "Male",
+			Age:             13,
+			VaccinePass:     "ADa",
+			StatusVaccines:  "Ada",
+		}
+
+		citizenRepository.On("FindById", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturn, nil).Once()
+
+		dataCitizen, err := CitizenService.CitizenFindById(context.Background(), ctxId)
+		assert.Nil(t, err)
+		assert.Equal(t, dataCitizen.Name, expectedReturn.Name)
 	})
 }

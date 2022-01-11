@@ -35,6 +35,7 @@ func (c1 *ControllerList) Registration(e *echo.Echo) {
 	apiV1.POST("/admin/registers", c1.HealthController.Register)
 	apiV1.POST("/admin/logins", c1.HealthController.Login)
 	apiV1.GET("/admins", c1.HealthController.GetAllHealthFacilitator)
+	apiV1.GET("/admin/:id", c1.HealthController.FindById)
 
 	//  FAMILY THINGS
 	apiV1.GET("/families/:id", c1.FamilyController.GetFamilyById, middleware.JWTWithConfig(c1.JWTMiddleware))
@@ -45,7 +46,7 @@ func (c1 *ControllerList) Registration(e *echo.Echo) {
 
 	//	VACCINE THINGS
 	apiV1.GET("/vaccine/:id", c1.VaccineController.FindVaccineById, middleware.JWTWithConfig(c1.JWTMiddleware))
-	apiV1.GET("/vaccines", c1.VaccineController.FindVaccineOwnedByHF, middleware.JWTWithConfig(c1.JWTMiddleware))
+	apiV1.GET("/vaccines/:id", c1.VaccineController.FindVaccineOwnedByHF, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.POST("/vaccines", c1.VaccineController.Create, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.PUT("/vaccine/:id", c1.VaccineController.Update, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.DELETE("/vaccine/:id", c1.VaccineController.Delete, middleware.JWTWithConfig(c1.JWTMiddleware))
@@ -53,7 +54,7 @@ func (c1 *ControllerList) Registration(e *echo.Echo) {
 	// Vaccine Session
 	apiV1.POST("/vaccine/sessions", c1.VaccineSessionController.CreateSession, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.GET("/vaccine/session/:id", c1.VaccineSessionController.GetSessionById, middleware.JWTWithConfig(c1.JWTMiddleware))
-	apiV1.GET("/vaccine/session", c1.VaccineSessionController.GetSessionOwnedByHf, middleware.JWTWithConfig(c1.JWTMiddleware))
+	apiV1.GET("/vaccine/session/owned/:id", c1.VaccineSessionController.GetSessionOwnedByHf, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.DELETE("/vaccine/session/:id", c1.VaccineSessionController.DeleteSession, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.PUT("/vaccine/session/:id", c1.VaccineSessionController.UpdateSession, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.GET("/vaccine/sessions", c1.VaccineSessionController.GetAllVaccineSession, middleware.JWTWithConfig(c1.JWTMiddleware))

@@ -28,7 +28,7 @@ func (controller *VaccineDetailControllerImpl) CitizenChooseSession(c echo.Conte
 	}
 	session, err := controller.sessionDetail.CitizenChooseSession(ctx, ctxId, atoi)
 	if err != nil {
-		return controllers.InternalServerError(c, http.StatusInternalServerError, err)
+		return controllers.BadRequestResponse(c, http.StatusNotAcceptable,err)
 	}
 
 	var response []web.SessionDetailDo

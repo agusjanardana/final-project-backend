@@ -40,7 +40,7 @@ func (controller *VaccineSessionControllerImpl) CreateSession(c echo.Context) er
 	copier.Copy(&entityService, &req)
 	session, err := controller.vaccineSessionService.CreateSession(ctx, entityService)
 	if err != nil {
-		return controllers.InternalServerError(c, http.StatusInternalServerError, err)
+		return controllers.BadRequestResponse(c, http.StatusNotAcceptable,err)
 	}
 	response := web.VaccineSessionCreateResponse{}
 	copier.Copy(&response, &session)
@@ -67,9 +67,14 @@ func (controller *VaccineSessionControllerImpl) GetSessionById(c echo.Context) e
 
 func (controller *VaccineSessionControllerImpl) GetSessionOwnedByHf(c echo.Context) error {
 	ctx := c.Request().Context()
-	ctxId := middleware.GetUserId(c)
+	//ctxId := middleware.GetUserId(c)
+	idParam := c.Param("id")
+	dataToInteger, err := strconv.Atoi(idParam)
+	if err != nil {
+		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
+	}
 
-	data, err := controller.vaccineSessionService.GetSessionOwnedByHf(ctx, ctxId)
+	data, err := controller.vaccineSessionService.GetSessionOwnedByHf(ctx, dataToInteger)
 	if err != nil {
 		return controllers.BadRequestResponse(c, http.StatusInternalServerError, err)
 	}

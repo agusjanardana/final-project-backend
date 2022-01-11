@@ -2,6 +2,7 @@ package HealthRepository
 
 import (
 	"context"
+	"errors"
 	"vaccine-app-be/app/config/mysql"
 	"vaccine-app-be/drivers/records"
 )
@@ -38,4 +39,14 @@ func (repository *HealthRepositoryImpl) GetAllHealthFacilitator(ctx context.Cont
 		return record, err
 	}
 	return record, nil
+}
+
+func (repository *HealthRepositoryImpl) FindById(ctx context.Context, hfId int) (records.HealthFacilitator, error) {
+	healthF := records.HealthFacilitator{}
+
+	data := repository.client.Conn().WithContext(ctx).Preload("Vaccine.VaccineSession").Preload("VaccineSession.VaccineSessionDetail").Preload("VaccineSession").Where("id = ?", hfId).Find(&healthF)
+	if data.RowsAffected == 0 {
+		return records.HealthFacilitator{}, errors.New("data not found")
+	}
+	return healthF, nil
 }

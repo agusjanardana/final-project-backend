@@ -4,6 +4,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strconv"
 	"vaccine-app-be/controllers"
 	"vaccine-app-be/controllers/HealthController/web"
 	"vaccine-app-be/services/HfService"
@@ -12,7 +13,6 @@ import (
 type HealthFacilitatorCtrlImpl struct {
 	healthService HfService.HealthService
 }
-
 
 func NewHealthFacilitatorsController(healthFacilitator HfService.HealthService) HealthFacilitatorController {
 	return &HealthFacilitatorCtrlImpl{healthService: healthFacilitator}
@@ -56,7 +56,7 @@ func (controller *HealthFacilitatorCtrlImpl) Login(c echo.Context) error {
 	}
 
 	return controllers.NewSuccessResponse(c, echo.Map{
-		"token" : login,
+		"token": login,
 	})
 }
 
@@ -70,5 +70,23 @@ func (controller *HealthFacilitatorCtrlImpl) GetAllHealthFacilitator(c echo.Cont
 
 	var response []web.HealthFacilitator
 	copier.Copy(&response, &facilitator)
+	return controllers.NewSuccessResponse(c, response)
+}
+
+func (controller *HealthFacilitatorCtrlImpl) FindById(c echo.Context) error {
+	ctx := c.Request().Context()
+	requestId := c.Param("id")
+	dataToInteger, err := strconv.Atoi(requestId)
+	if err != nil {
+		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
+	}
+	dataService, err := controller.healthService.FindById(ctx, dataToInteger)
+	if err != nil {
+		return controllers.InternalServerError(c, http.StatusInternalServerError, err)
+	}
+
+	response := web.HealthFacilitator{}
+	copier.Copy(&response, &dataService)
+
 	return controllers.NewSuccessResponse(c, response)
 }

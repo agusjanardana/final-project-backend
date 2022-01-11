@@ -1,0 +1,598 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>CitizenService: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">vaccine-app-be/services/CitizenService/citizen_service_impl.go (81.8%)</option>
+				
+				<option value="file1">vaccine-app-be/services/CitizenService/domain.go (100.0%)</option>
+				
+				<option value="file2">vaccine-app-be/services/FamilyService/domain.go (100.0%)</option>
+				
+				<option value="file3">vaccine-app-be/services/FamilyService/family_service_impl.go (81.8%)</option>
+				
+				<option value="file4">vaccine-app-be/services/HfService/domain.go (50.0%)</option>
+				
+				<option value="file5">vaccine-app-be/services/HfService/health_service_impl.go (81.1%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package CitizenService
+
+import (
+        "context"
+        "errors"
+        "github.com/jinzhu/copier"
+        "gorm.io/gorm"
+        "log"
+        "time"
+        "vaccine-app-be/app/middleware"
+        "vaccine-app-be/drivers/records"
+        "vaccine-app-be/drivers/repository/CitizenRepository"
+        "vaccine-app-be/drivers/repository/FamilyRepository"
+        "vaccine-app-be/utilities"
+)
+
+type CitizenServiceImpl struct {
+        CitizenRepository CitizenRepository.CitizenRepository
+        jwtAuth           *middleware.ConfigJWT
+        FamilyRepository  FamilyRepository.FamilyRepository
+}
+
+func NewCitizenService(CitizenRepository CitizenRepository.CitizenRepository, jwtAuth *middleware.ConfigJWT, FamilyRepository FamilyRepository.FamilyRepository) CitizenService <span class="cov8" title="1">{
+        return &amp;CitizenServiceImpl{
+                CitizenRepository: CitizenRepository,
+                jwtAuth:           jwtAuth,
+                FamilyRepository:  FamilyRepository,
+        }
+}</span>
+
+func (service *CitizenServiceImpl) Register(ctx context.Context, citizen Citizen) (Citizen, error) <span class="cov8" title="1">{
+        err := citizen.Validate()
+        if err != nil </span><span class="cov8" title="1">{
+                return citizen, err
+        }</span>
+        //checking if emails is already used
+        <span class="cov8" title="1">byEmail, err := service.CitizenRepository.FindByEmail(ctx, citizen.Email)
+        if err != nil &amp;&amp; !errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                return citizen, err
+        }</span>
+
+        <span class="cov8" title="1">if byEmail.Email == citizen.Email </span><span class="cov8" title="1">{
+                return citizen, errors.New("email already used")
+        }</span>
+
+        <span class="cov8" title="1">password, err := utilities.HashPassword(citizen.Password)
+        if err != nil </span><span class="cov0" title="0">{
+                return citizen, err
+        }</span>
+        <span class="cov8" title="1">citizen.Password = string(password)
+
+        entityCitizen := new(records.Citizen)
+        copier.Copy(&amp;entityCitizen, &amp;citizen)
+
+        registeredUser, err := service.CitizenRepository.Register(ctx, *entityCitizen)
+        if err != nil </span><span class="cov0" title="0">{
+                return citizen, err
+        }</span>
+        <span class="cov8" title="1">resp := Citizen{}
+        copier.Copy(&amp;resp, &amp;registeredUser)
+        //handle auto registered family members
+        data := resp.ToRecordFamily()
+        log.Println(data)
+        _, err = service.FamilyRepository.Create(ctx, data)
+        if err != nil </span><span class="cov0" title="0">{
+                return Citizen{}, err
+        }</span>
+        <span class="cov8" title="1">return resp, nil</span>
+}
+
+func (service *CitizenServiceImpl) Login(ctx context.Context, email, password string) (string, error) <span class="cov8" title="1">{
+        if len(email) == 0 || len(password) == 0 </span><span class="cov0" title="0">{
+                return "", errors.New("email or password blank")
+        }</span>
+
+        <span class="cov8" title="1">byEmail, err := service.CitizenRepository.FindByEmail(ctx, email)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">matchPassword := utilities.CheckPasswordHash(password, byEmail.Password)
+
+        if !matchPassword </span><span class="cov8" title="1">{
+                return "", errors.New("password doesn't match")
+        }</span>
+
+        <span class="cov8" title="1">jwt := service.jwtAuth.GenerateToken(byEmail.Id, byEmail.Name, byEmail.Role)
+
+        return jwt, nil</span>
+}
+
+func (service *CitizenServiceImpl) Update(ctx context.Context, userId int, birthDay time.Time, address string) (Citizen, error) <span class="cov8" title="1">{
+        update, err := service.CitizenRepository.Update(ctx, userId, birthDay, address)
+        if err != nil </span><span class="cov0" title="0">{
+                return Citizen{}, err
+        }</span>
+        <span class="cov8" title="1">entity := Citizen{}
+        copier.Copy(&amp;entity, &amp;update)
+        record := records.FamilyMember{Birthday: birthDay, Address: address}
+        data, err := service.FamilyRepository.GetCitizenOwnFamily(ctx, userId)
+        if err != nil </span><span class="cov0" title="0">{
+                return Citizen{}, err
+        }</span>
+        <span class="cov8" title="1">_, err = service.FamilyRepository.Update(ctx, data[0].Id, record)
+        if err != nil </span><span class="cov0" title="0">{
+                return Citizen{}, err
+        }</span>
+        <span class="cov8" title="1">return entity, nil</span>
+}
+
+func (service *CitizenServiceImpl) CitizenFindById(ctx context.Context, userId int) (Citizen, error) <span class="cov8" title="1">{
+        citizenData, err := service.CitizenRepository.FindById(ctx, userId)
+        if err != nil </span><span class="cov0" title="0">{
+                return Citizen{}, err
+        }</span>
+        <span class="cov8" title="1">entityCitizenRespond := Citizen{}
+        copier.Copy(&amp;entityCitizenRespond, &amp;citizenData)
+        return entityCitizenRespond, nil</span>
+}
+
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package CitizenService
+
+import (
+        validation "github.com/go-ozzo/ozzo-validation"
+        "github.com/go-ozzo/ozzo-validation/is"
+        "time"
+        "vaccine-app-be/drivers/records"
+)
+
+type Citizen struct {
+        Id              int
+        Name            string
+        Email           string
+        Password        string
+        NIK             string
+        Address         string
+        HandphoneNumber string
+        VaccinePass     string
+        StatusVaccines  string
+        Age             int
+        Gender          string
+        Birthday        time.Time
+        FamilyMember   []FamilyMember
+}
+
+type FamilyMember struct {
+        Id   int
+        Name string
+}
+
+func (c *Citizen) ToRecordFamily() records.FamilyMember <span class="cov8" title="1">{
+        recordFamily := records.FamilyMember{
+                Name:      c.Name,
+                Birthday:  c.Birthday,
+                Nik:       c.NIK,
+                Gender:    c.Gender,
+                Age:       c.Age,
+                Handphone: c.HandphoneNumber,
+                CitizenId: c.Id,
+        }
+        return recordFamily
+}</span>
+
+func (citizen Citizen) Validate() error <span class="cov8" title="1">{
+        return validation.ValidateStruct(&amp;citizen,
+                //validasi Nama tidak boleh kosong
+                validation.Field(&amp;citizen.Name, validation.Required),
+                //validasi Email no kosong, and regex
+                validation.Field(&amp;citizen.Email, validation.Required, is.Email),
+                //validasi NIK tidak boleh kosong
+                validation.Field(&amp;citizen.NIK, validation.Required),
+                //validation password no kosong
+                validation.Field(&amp;citizen.Password, validation.Required),
+        )
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package FamilyService
+
+import (
+        validation "github.com/go-ozzo/ozzo-validation"
+        "time"
+)
+
+type FamilyMember struct {
+        Id        int
+        Name      string
+        Birthday  time.Time
+        Nik       string
+        Gender    string
+        Age       int
+        Handphone string
+        CitizenId int
+}
+
+func (fm FamilyMember) Validation() error <span class="cov8" title="1">{
+        return validation.ValidateStruct(&amp;fm,
+                validation.Field(&amp;fm.Name, validation.Required),
+                validation.Field(&amp;fm.Nik, validation.Required),
+                validation.Field(&amp;fm.Age, validation.Required),
+        )
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package FamilyService
+
+import (
+        "context"
+        "errors"
+        "github.com/jinzhu/copier"
+        "vaccine-app-be/drivers/records"
+        "vaccine-app-be/drivers/repository/FamilyRepository"
+)
+
+type FamilyServiceImpl struct {
+        FamilyRepository FamilyRepository.FamilyRepository
+}
+
+func NewFamilyService(FamilyRepository FamilyRepository.FamilyRepository) FamilyService <span class="cov8" title="1">{
+        return &amp;FamilyServiceImpl{
+                FamilyRepository: FamilyRepository,
+        }
+}</span>
+
+func (service *FamilyServiceImpl) Create(ctx context.Context, id int, family FamilyMember) (FamilyMember, error) <span class="cov8" title="1">{
+        err := family.Validation()
+        if err != nil </span><span class="cov8" title="1">{
+                return FamilyMember{}, err
+        }</span>
+
+        <span class="cov8" title="1">if len(string(rune(id))) == 0 </span><span class="cov0" title="0">{
+                return FamilyMember{}, errors.New("user id cannot be blank")
+        }</span>
+        //set id
+        <span class="cov8" title="1">family.CitizenId = id
+
+        entityFamily := new(records.FamilyMember)
+        copier.Copy(entityFamily, &amp;family)
+        create, err := service.FamilyRepository.Create(ctx, *entityFamily)
+        if err != nil </span><span class="cov0" title="0">{
+                return FamilyMember{}, err
+        }</span>
+        <span class="cov8" title="1">respond := FamilyMember{}
+        copier.Copy(&amp;respond, &amp;create)
+
+        return respond, nil</span>
+}
+
+func (service *FamilyServiceImpl) GetFamilyById(ctx context.Context, id int) (FamilyMember, error) <span class="cov8" title="1">{
+        byId, err := service.FamilyRepository.GetFamilyById(ctx, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return FamilyMember{}, err
+        }</span>
+        <span class="cov8" title="1">respond := FamilyMember{}
+        copier.Copy(&amp;respond, &amp;byId)
+
+        return respond, nil</span>
+
+}
+
+func (service *FamilyServiceImpl) GetCitizenOwnFamily(ctx context.Context, citizenId int) ([]FamilyMember, error) <span class="cov8" title="1">{
+        if len(string(rune(citizenId))) == 0 </span><span class="cov0" title="0">{
+                return nil, errors.New("citizen id cannot be blank")
+        }</span>
+
+        <span class="cov8" title="1">family, err := service.FamilyRepository.GetCitizenOwnFamily(ctx, citizenId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">var response []FamilyMember
+        copier.Copy(&amp;response, &amp;family)
+        return response, nil</span>
+}
+
+func (service *FamilyServiceImpl) Update(ctx context.Context, citizenId , id int, family FamilyMember) (FamilyMember, error) <span class="cov8" title="1">{
+        if len(string(rune(id))) == 0 </span><span class="cov0" title="0">{
+                return family, errors.New("id cannot be blank")
+        }</span>
+
+        <span class="cov8" title="1">data, err := service.FamilyRepository.GetFamilyById(ctx, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return FamilyMember{}, err
+        }</span>
+        <span class="cov8" title="1">if data.CitizenId != citizenId</span><span class="cov0" title="0">{
+                return FamilyMember{}, errors.New("this family doesn't belongs to you, cannot update")
+        }</span>
+
+        <span class="cov8" title="1">request := new(records.FamilyMember)
+        copier.Copy(request, &amp;family)
+        update, err := service.FamilyRepository.Update(ctx, id, *request)
+        if err != nil </span><span class="cov0" title="0">{
+                return FamilyMember{}, err
+        }</span>
+
+        <span class="cov8" title="1">respond := FamilyMember{}
+        copier.Copy(&amp;respond, &amp;update)
+
+        return respond, nil</span>
+}
+
+func (service *FamilyServiceImpl) Delete(ctx context.Context, id int, citizenId int) (string, error) <span class="cov8" title="1">{
+        if len(string(rune(id))) == 0 || len(string(rune(citizenId))) == 0 </span><span class="cov0" title="0">{
+                return "", errors.New("field cannot be blank")
+        }</span>
+
+        <span class="cov8" title="1">byId, err := service.FamilyRepository.GetFamilyById(ctx, id)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">if byId.CitizenId == citizenId </span><span class="cov8" title="1">{
+                _ , err := service.FamilyRepository.Delete(ctx, id,citizenId)
+                if err != nil </span><span class="cov0" title="0">{
+                        return "", err
+                }</span>
+        } else<span class="cov0" title="0"> {
+                return "", errors.New("this family is not belongs to you")
+        }</span>
+        <span class="cov8" title="1">return "success delete data", nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package HfService
+
+import (
+        validation "github.com/go-ozzo/ozzo-validation"
+        "github.com/go-ozzo/ozzo-validation/is"
+        "time"
+)
+
+type HealthFacilitator struct {
+        Id                        int
+        Name                      string
+        Email                     string
+        Password                  string
+        FacilitatorsCertification string
+        Address                   string
+        Longitude                 string
+        Latitude                  string
+        Type                      string
+        Vaccine                   []Vaccine
+        VaccineSession            []VaccineSession
+}
+
+type Vaccine struct {
+        Id                  int
+        HealthFacilitatorId int
+        Name                string
+        Stock               int
+        VaccineSession      []VaccineSession
+}
+
+type VaccineSession struct {
+        Id                   int
+        StartDate            time.Time
+        EndDate              time.Time
+        Quota                int
+        SessionType          string
+        VaccineId            int
+        HealthFacilitatorId  int
+        Status               string
+        VaccineSessionDetail []VaccineSessionDetail
+}
+
+type VaccineSessionDetail struct {
+        Id             int
+        SessionId      int
+        FamilyMemberId int
+}
+
+func (hf HealthFacilitator) ValidateRequest() error <span class="cov0" title="0">{
+        return validation.ValidateStruct(&amp;hf,
+                //                validasi request email
+                validation.Field(&amp;hf.Email, validation.Required, is.Email),
+                //                validasi Password
+                validation.Field(&amp;hf.Password, validation.Required),
+        )
+}</span>
+
+func (hf HealthFacilitator) Validate() error <span class="cov8" title="1">{
+        return validation.ValidateStruct(&amp;hf,
+                //validasi Nama tidak boleh kosong
+                validation.Field(&amp;hf.Name, validation.Required),
+                //validasi Email no kosong, and regex
+                validation.Field(&amp;hf.Email, validation.Required, is.Email),
+                //validasi NIK tidak boleh kosong
+                validation.Field(&amp;hf.Address, validation.Required),
+                //validation password no kosong
+                validation.Field(&amp;hf.Password, validation.Required),
+                //validation longitude no kosong
+                validation.Field(&amp;hf.Longitude, validation.Required),
+                //validation Latitude no kosong
+                validation.Field(&amp;hf.Latitude, validation.Required),
+        )
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package HfService
+
+import (
+        "context"
+        "errors"
+        "github.com/jinzhu/copier"
+        "gorm.io/gorm"
+        "vaccine-app-be/app/middleware"
+        "vaccine-app-be/drivers/records"
+        "vaccine-app-be/drivers/repository/HealthRepository"
+        "vaccine-app-be/utilities"
+)
+
+type HealthServiceImpl struct {
+        HealthRepository HealthRepository.HealthRepository
+        jwtAuth          *middleware.ConfigJWT
+}
+
+func NewHealthService(HealthRepository HealthRepository.HealthRepository, jwtAuth *middleware.ConfigJWT) HealthService <span class="cov8" title="1">{
+        return &amp;HealthServiceImpl{
+                HealthRepository: HealthRepository,
+                jwtAuth:          jwtAuth,
+        }
+}</span>
+
+func (service *HealthServiceImpl) Register(ctx context.Context, healthF HealthFacilitator) (HealthFacilitator, error) <span class="cov8" title="1">{
+        err := healthF.Validate()
+        if err != nil </span><span class="cov0" title="0">{
+                return healthF, err
+        }</span>
+
+        <span class="cov8" title="1">email, err := service.HealthRepository.FindByEmail(ctx, healthF.Email)
+        if err != nil &amp;&amp; !errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov0" title="0">{
+                return HealthFacilitator{}, err
+        }</span>
+
+        <span class="cov8" title="1">if email.Email == healthF.Email </span><span class="cov8" title="1">{
+                return HealthFacilitator{}, errors.New("email already used")
+        }</span>
+
+        <span class="cov8" title="1">password, err := utilities.HashPassword(healthF.Password)
+        if err != nil </span><span class="cov0" title="0">{
+                return HealthFacilitator{}, err
+        }</span>
+        <span class="cov8" title="1">healthF.Password = string(password)
+
+        entityHf := new(records.HealthFacilitator)
+        copier.Copy(entityHf, &amp;healthF)
+        register, err := service.HealthRepository.Register(ctx, *entityHf)
+        if err != nil </span><span class="cov0" title="0">{
+                return HealthFacilitator{}, err
+        }</span>
+
+        <span class="cov8" title="1">respond := HealthFacilitator{}
+        copier.Copy(&amp;respond, &amp;register)
+
+        return respond, nil</span>
+}
+
+func (service *HealthServiceImpl) Login(ctx context.Context, email, password string) (string, error) <span class="cov8" title="1">{
+        if len(email) == 0 || len(password) == 0 </span><span class="cov0" title="0">{
+                return "", errors.New("email or password blank")
+        }</span>
+
+        <span class="cov8" title="1">byEmail, err := service.HealthRepository.FindByEmail(ctx, email)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">matchPassword := utilities.CheckPasswordHash(password, byEmail.Password)
+        if !matchPassword </span><span class="cov8" title="1">{
+                return "", errors.New("password doesn't match")
+        }</span>
+        <span class="cov8" title="1">jwt := service.jwtAuth.GenerateToken(byEmail.Id, byEmail.Name, byEmail.Role)
+        return jwt, nil</span>
+}
+
+func (service *HealthServiceImpl) GetAllHealthFacilitator(ctx context.Context) ([]HealthFacilitator, error) <span class="cov8" title="1">{
+        facilitator, err := service.HealthRepository.GetAllHealthFacilitator(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var response []HealthFacilitator
+        copier.Copy(&amp;response, &amp;facilitator)
+
+        return response, nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
