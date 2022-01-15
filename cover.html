@@ -67,6 +67,16 @@
 				
 				<option value="file5">vaccine-app-be/services/HfService/health_service_impl.go (80.4%)</option>
 				
+				<option value="file6">vaccine-app-be/services/SessionDetailService/session_detail_impl.go (85.4%)</option>
+				
+				<option value="file7">vaccine-app-be/services/VaccineService/domain.go (100.0%)</option>
+				
+				<option value="file8">vaccine-app-be/services/VaccineService/vaccine_service_impl.go (92.9%)</option>
+				
+				<option value="file9">vaccine-app-be/services/VaccineSessionService/domain.go (100.0%)</option>
+				
+				<option value="file10">vaccine-app-be/services/VaccineSessionService/vaccine_session_service_impl.go (93.6%)</option>
+				
 				</select>
 			</div>
 			<div id="legend">
@@ -619,6 +629,448 @@ func (service *HealthServiceImpl) Update(ctx context.Context, hfId int, domain H
         }
 
         <span class="cov0" title="0">return HealthFacilitator{}, err</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package SessionDetailService
+
+import (
+        "context"
+        "errors"
+        "github.com/jinzhu/copier"
+        "vaccine-app-be/drivers/records"
+        "vaccine-app-be/drivers/repository/FamilyRepository"
+        "vaccine-app-be/drivers/repository/VaccineSessionDetailRepository"
+        "vaccine-app-be/drivers/repository/VaccineSessionRepository"
+)
+
+type SessionDetailImpl struct {
+        sessionDetail  VaccineSessionDetailRepository.VaccineSessionDetail
+        family         FamilyRepository.FamilyRepository
+        vaccineSession VaccineSessionRepository.VaccineSessionRepository
+}
+
+func NewSessionDetail(sessionDetail VaccineSessionDetailRepository.VaccineSessionDetail, family FamilyRepository.FamilyRepository, vaccineSession VaccineSessionRepository.VaccineSessionRepository) SessionDetail <span class="cov8" title="1">{
+        return &amp;SessionDetailImpl{sessionDetail: sessionDetail, family: family, vaccineSession: vaccineSession}
+}</span>
+func (service *SessionDetailImpl) CitizenChooseSession(ctx context.Context, citizenId, sessionId int) ([]SessionDetailDo, error) <span class="cov8" title="1">{
+        citizenFamily, err := service.family.GetCitizenOwnFamily(ctx, citizenId)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        //dapatkan jumlah keluarga
+        <span class="cov8" title="1">countFamily := len(citizenFamily)
+
+        dataSession, err := service.vaccineSession.FindById(ctx, sessionId)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if string(rune(dataSession.Id)) == "" </span><span class="cov0" title="0">{
+                return nil, errors.New("session doesn't exist")
+        }</span>
+
+        <span class="cov8" title="1">if dataSession.Quota == 0 </span><span class="cov0" title="0">{
+                return nil, errors.New("session quota is full")
+        }</span>
+
+        <span class="cov8" title="1">detailData, _ := service.sessionDetail.GetDetailBySessionId(ctx, sessionId)
+        countSessionData := len(detailData)
+
+        if countFamily+countSessionData &gt; dataSession.Quota </span><span class="cov0" title="0">{
+                return []SessionDetailDo{}, errors.New("the quota in this session cannot accommodate your family members")
+        }</span> else<span class="cov8" title="1"> {
+                data := make([]SessionDetailDo, countFamily)
+                for i, v := range citizenFamily </span><span class="cov8" title="1">{
+                        create, err := service.sessionDetail.Create(ctx, sessionId, v.Id)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return []SessionDetailDo{}, err
+                        }</span>
+                        <span class="cov8" title="1">data[i].Id = create.Id
+                        data[i].SessionId = create.SessionId
+                        data[i].FamilyMemberId = create.FamilyMemberId</span>
+                }
+
+                //kurangi jumlah quota di DB untuk data realtime.
+                <span class="cov8" title="1">entitySession := records.VaccineSession{}
+                entitySession.Quota = dataSession.Quota - countFamily
+                _, err := service.vaccineSession.Update(ctx, dataSession.Id, dataSession.HealthFacilitatorId, entitySession)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">return data, nil</span>
+        }
+}
+
+func (service *SessionDetailImpl) GetDetailBySessionId(ctx context.Context, sessionId int) ([]SessionDetailDo, error) <span class="cov8" title="1">{
+        data, err := service.sessionDetail.GetDetailBySessionId(ctx, sessionId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">var response []SessionDetailDo
+        copier.Copy(&amp;response, &amp;data)
+
+        return response, nil</span>
+}
+
+func (service *SessionDetailImpl) GetDetailById(ctx context.Context, id int) (SessionDetailDo, error) <span class="cov8" title="1">{
+        data, err := service.sessionDetail.GetDetailById(ctx, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return SessionDetailDo{}, err
+
+        }</span>
+        <span class="cov8" title="1">response := SessionDetailDo{}
+        copier.Copy(&amp;response, &amp;data)
+
+        return response, nil</span>
+}
+
+func (service *SessionDetailImpl) GetDetailByFamilyId(ctx context.Context, fmid int) ([]SessionDetailDo, error) <span class="cov8" title="1">{
+        data, err := service.sessionDetail.GetDetailByFamilyId(ctx, fmid)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var response []SessionDetailDo
+        copier.Copy(&amp;response, &amp;data)
+        return response, nil</span>
+
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package VaccineService
+
+import (
+        validation "github.com/go-ozzo/ozzo-validation"
+)
+
+type Vaccine struct {
+        Id                  int
+        HealthFacilitatorId int
+        Name                string
+        Stock               int
+}
+
+type VaccineUpdate struct {
+        Name  string
+        Stock int
+}
+
+func (vc Vaccine) ValidateRequest() error <span class="cov8" title="1">{
+        return validation.ValidateStruct(&amp;vc,
+                //                validasi request email
+                validation.Field(&amp;vc.HealthFacilitatorId, validation.Required),
+                //                validasi Password
+                validation.Field(&amp;vc.Name, validation.Required),
+                validation.Field(&amp;vc.Stock, validation.Required),
+        )
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package VaccineService
+
+import (
+        "context"
+        "github.com/jinzhu/copier"
+        "vaccine-app-be/drivers/records"
+        "vaccine-app-be/drivers/repository/VaccineRepository"
+)
+
+type VaccineServiceImpl struct {
+        vaccineRepository VaccineRepository.VaccineRepository
+}
+
+func NewVaccineRepository(vaccineRepository VaccineRepository.VaccineRepository) VaccineService <span class="cov8" title="1">{
+        return &amp;VaccineServiceImpl{vaccineRepository: vaccineRepository}
+}</span>
+
+func (service *VaccineServiceImpl) Create(ctx context.Context, vaccine Vaccine) (Vaccine, error) <span class="cov8" title="1">{
+        err := vaccine.ValidateRequest()
+        if err != nil </span><span class="cov8" title="1">{
+                return Vaccine{}, err
+        }</span>
+        <span class="cov8" title="1">entityVaccine := new(records.Vaccine)
+        copier.Copy(entityVaccine, &amp;vaccine)
+        create, err := service.vaccineRepository.Create(ctx, *entityVaccine)
+        if err != nil </span><span class="cov0" title="0">{
+                return Vaccine{}, err
+        }</span>
+
+        <span class="cov8" title="1">response := Vaccine{}
+        copier.Copy(&amp;response, &amp;create)
+
+        return response, nil</span>
+}
+
+func (service *VaccineServiceImpl) Update(ctx context.Context, hfid, vaccineId int, vaccine Vaccine) (Vaccine, error) <span class="cov8" title="1">{
+        _, err := service.FindVaccineById(ctx, vaccineId)
+        if err != nil </span><span class="cov8" title="1">{
+                return Vaccine{}, err
+        }</span>
+        <span class="cov8" title="1">entityVaccine := new(records.Vaccine)
+        copier.Copy(&amp;entityVaccine, &amp;vaccine)
+        update, err := service.vaccineRepository.Update(ctx, hfid, vaccineId, *entityVaccine)
+        if err != nil </span><span class="cov0" title="0">{
+                return Vaccine{}, err
+        }</span>
+        <span class="cov8" title="1">response := Vaccine{}
+        copier.Copy(&amp;response, &amp;update)
+        return response, nil</span>
+}
+
+func (service *VaccineServiceImpl) Delete(ctx context.Context, hfid, vaccineId int) (string, error) <span class="cov8" title="1">{
+        _, err := service.FindVaccineById(ctx, vaccineId)
+        if err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">_, err = service.vaccineRepository.Delete(ctx, hfid, vaccineId)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov8" title="1">return "success delete data", nil</span>
+}
+
+func (service *VaccineServiceImpl) FindVaccineById(ctx context.Context, vaccineId int) (Vaccine, error) <span class="cov8" title="1">{
+        id, err := service.vaccineRepository.FindVaccineById(ctx, vaccineId)
+        if err != nil </span><span class="cov8" title="1">{
+                return Vaccine{}, err
+        }</span>
+        <span class="cov8" title="1">response := Vaccine{}
+        copier.Copy(&amp;response, &amp;id)
+        return response, nil</span>
+}
+
+func (service *VaccineServiceImpl) FindVaccineOwnedByHF(ctx context.Context, hfid int) ([]Vaccine, error) <span class="cov8" title="1">{
+        hf, err := service.vaccineRepository.FindVaccineOwnedByHF(ctx, hfid)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">var response []Vaccine
+        copier.Copy(&amp;response, &amp;hf)
+
+        return response, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package VaccineSessionService
+
+import (
+        validation "github.com/go-ozzo/ozzo-validation"
+        "time"
+)
+
+type VaccineSession struct {
+        Id                   int
+        StartDate            time.Time
+        EndDate              time.Time
+        Quota                int
+        SessionType          string
+        VaccineId            int
+        HealthFacilitatorId  int
+        Status               string
+        VaccineSessionDetail []VaccineSessionDetail
+}
+
+type VaccineSessionDetail struct {
+        Id             int
+        SessionId      int
+        FamilyMemberId int
+}
+
+func (vs VaccineSession) ValidateRequest() error <span class="cov8" title="1">{
+        return validation.ValidateStruct(&amp;vs,
+                validation.Field(&amp;vs.StartDate, validation.Required),
+                validation.Field(&amp;vs.EndDate, validation.Required),
+                validation.Field(&amp;vs.Quota, validation.Required),
+                validation.Field(&amp;vs.SessionType, validation.Required),
+        )
+}</span>
+
+type UniqueSession struct {
+        Id int
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package VaccineSessionService
+
+import (
+        "context"
+        "errors"
+        "github.com/jinzhu/copier"
+        "vaccine-app-be/drivers/records"
+        "vaccine-app-be/drivers/repository/CitizenRepository"
+        "vaccine-app-be/drivers/repository/FamilyRepository"
+        "vaccine-app-be/drivers/repository/VaccineRepository"
+        "vaccine-app-be/drivers/repository/VaccineSessionRepository"
+)
+
+type VaccineSessionServiceImpl struct {
+        vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository
+        vaccineRepository        VaccineRepository.VaccineRepository
+        FamilyRepository         FamilyRepository.FamilyRepository
+        CitizenRepository        CitizenRepository.CitizenRepository
+}
+
+func NewSessionService(vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository, vaccineRepository VaccineRepository.VaccineRepository, FamilyRepository FamilyRepository.FamilyRepository, CitizenRepository CitizenRepository.CitizenRepository) VaccineSessionService <span class="cov8" title="1">{
+        return &amp;VaccineSessionServiceImpl{vaccineSessionRepository: vaccineSessionRepository, vaccineRepository: vaccineRepository, FamilyRepository: FamilyRepository, CitizenRepository: CitizenRepository}
+}</span>
+
+func (service *VaccineSessionServiceImpl) CreateSession(ctx context.Context, domain VaccineSession) (VaccineSession, error) <span class="cov8" title="1">{
+        err := domain.ValidateRequest()
+        if err != nil </span><span class="cov8" title="1">{
+                return VaccineSession{}, err
+        }</span>
+
+        <span class="cov8" title="1">entitySession := records.VaccineSession{}
+        copier.Copy(&amp;entitySession, domain)
+        vaccineData, err := service.vaccineRepository.FindVaccineById(ctx, domain.VaccineId)
+        if err != nil </span><span class="cov8" title="1">{
+                return VaccineSession{}, err
+        }</span>
+
+        <span class="cov8" title="1">if domain.Quota &gt; vaccineData.Stock </span><span class="cov8" title="1">{
+                return VaccineSession{}, errors.New("vaccine stocks could not meet demand")
+        }</span> else<span class="cov8" title="1"> {
+                data, err := service.vaccineSessionRepository.Create(ctx, entitySession)
+                if err != nil </span><span class="cov0" title="0">{
+                        return VaccineSession{}, err
+                }</span>
+
+                //kurangi jumlah stock di DB untuk data realtime.
+                <span class="cov8" title="1">entityVaccine := records.Vaccine{}
+                entityVaccine.Stock = vaccineData.Stock - data.Quota
+                _, err = service.vaccineRepository.Update(ctx, vaccineData.HealthFacilitatorId, domain.VaccineId, entityVaccine)
+                if err != nil </span><span class="cov0" title="0">{
+                        return VaccineSession{}, err
+                }</span>
+                <span class="cov8" title="1">response := VaccineSession{}
+                copier.Copy(&amp;response, &amp;data)
+
+                return response, nil</span>
+        }
+}
+
+func (service *VaccineSessionServiceImpl) GetSessionById(ctx context.Context, id int) (VaccineSession, error) <span class="cov8" title="1">{
+        data, err := service.vaccineSessionRepository.FindById(ctx, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return VaccineSession{}, err
+        }</span>
+        <span class="cov8" title="1">response := VaccineSession{}
+        copier.Copy(&amp;response, &amp;data)
+
+        return response, nil</span>
+}
+
+func (service *VaccineSessionServiceImpl) GetSessionOwnedByHf(ctx context.Context, hfid int) ([]VaccineSession, error) <span class="cov8" title="1">{
+        data, err := service.vaccineSessionRepository.FindSessionOwnedByHf(ctx, hfid)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">var response []VaccineSession
+        copier.Copy(&amp;response, &amp;data)
+
+        return response, nil</span>
+}
+
+func (service *VaccineSessionServiceImpl) DeleteSession(ctx context.Context, hfid, id int) (string, error) <span class="cov8" title="1">{
+        byId, err := service.vaccineSessionRepository.FindById(ctx, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">if byId.HealthFacilitatorId == hfid </span><span class="cov8" title="1">{
+                _, err = service.vaccineSessionRepository.Delete(ctx, id, hfid)
+                if err != nil </span><span class="cov0" title="0">{
+                        return "", err
+                }</span>
+        } else<span class="cov8" title="1"> {
+                return "", errors.New("this session doesn't belongs to you")
+        }</span>
+
+        <span class="cov8" title="1">return "success delete data", nil</span>
+}
+
+func (service *VaccineSessionServiceImpl) UpdateSession(ctx context.Context, hfid, id int, domain VaccineSession) (VaccineSession, error) <span class="cov8" title="1">{
+        err := domain.ValidateRequest()
+        if err != nil </span><span class="cov8" title="1">{
+                return VaccineSession{}, err
+        }</span>
+        <span class="cov8" title="1">byId, err := service.vaccineSessionRepository.FindById(ctx, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return VaccineSession{}, err
+        }</span>
+
+        <span class="cov8" title="1">if byId.HealthFacilitatorId == hfid </span><span class="cov8" title="1">{
+                entitySession := records.VaccineSession{}
+                copier.Copy(&amp;entitySession, domain)
+                update, err := service.vaccineSessionRepository.Update(ctx, id, hfid, entitySession)
+                if err != nil </span><span class="cov0" title="0">{
+                        return VaccineSession{}, err
+                }</span>
+                <span class="cov8" title="1">update.Id = id
+                update.HealthFacilitatorId = hfid
+                response := VaccineSession{}
+                copier.Copy(&amp;response, &amp;update)
+                return response, nil</span>
+        } else<span class="cov8" title="1"> {
+                return VaccineSession{}, errors.New("cannot update this session, doesn't belong to yours")
+        }</span>
+}
+
+func (service *VaccineSessionServiceImpl) GetAllVaccineSession(ctx context.Context) ([]VaccineSession, error) <span class="cov8" title="1">{
+        session, err := service.vaccineSessionRepository.GetAllVaccineSession(ctx)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var response []VaccineSession
+        copier.Copy(&amp;response, &amp;session)
+
+        return response, nil</span>
+}
+
+func (service *VaccineSessionServiceImpl) GetCitizenAndFamilySelectedSession(ctx context.Context, citizenId int) ([]VaccineSession, error) <span class="cov8" title="1">{
+        citizenData, err := service.CitizenRepository.FindById(ctx, citizenId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">familyData, err := service.FamilyRepository.GetCitizenOwnFamily(ctx, citizenData.Id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">var uniqueSession []int
+        for _, v := range familyData</span><span class="cov8" title="1">{
+                skip := false
+                for _, u := range uniqueSession</span><span class="cov8" title="1">{
+                        if v.VaccineSessionDetail.SessionId == u </span><span class="cov8" title="1">{
+                                skip = true
+                                break</span>
+                        }
+                }
+                <span class="cov8" title="1">if !skip</span><span class="cov8" title="1">{
+                        temp := v.VaccineSessionDetail.SessionId
+                        uniqueSession = append(uniqueSession,temp)
+                }</span>
+        }
+
+        <span class="cov8" title="1">if len(uniqueSession) == 0</span><span class="cov0" title="0">{
+                return nil, errors.New("this citizen and family not selected any vaccine session")
+        }</span>
+
+        <span class="cov8" title="1">data := make([]VaccineSession, len(uniqueSession))
+        for _ , v := range uniqueSession</span><span class="cov8" title="1">{
+                dataRepository, err := service.vaccineSessionRepository.FindById(ctx, v)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">translate := VaccineSession{}
+                copier.Copy(&amp;translate, dataRepository)
+                data = append(data, translate)</span>
+        }
+
+        <span class="cov8" title="1">return data, nil</span>
 }
 </pre>
 		

@@ -15,23 +15,6 @@ func NewVaccineSessionRepository(client mysql.Client) VaccineSessionRepository {
 	return &VaccineSessionRepositoryImpl{client: client}
 }
 
-//func (repository *VaccineSessionRepositoryImpl) GetExpiredSession(ctx context.Context) ([]records.VaccineSession, error) {
-//	var record []records.VaccineSession
-//	data := repository.client.Conn().WithContext(ctx).Where("end_date < ? ", time.Now()).Find(&record)
-//	if data.RowsAffected == 0 {
-//		return []records.VaccineSession{}, errors.New("data not found")
-//	}
-//	return record, nil
-//}
-//
-//func (repository *VaccineSessionRepositoryImpl) UpdateSessionStatus(ctx context.Context, hfid, id int, status string) error {
-//	err := repository.client.Conn().WithContext(ctx).Exec("UPDATE vaccine_sessions SET status = ? WHERE id = ? AND health_facilitator_id = ?", status, id, hfid).Debug().Error
-//	if err != nil {
-//		return err
-//	}
-//	return nil
-//}
-
 func (repository *VaccineSessionRepositoryImpl) Create(ctx context.Context, record records.VaccineSession) (records.VaccineSession, error) {
 	err := repository.client.Conn().WithContext(ctx).Create(&record).Error
 	if err != nil {

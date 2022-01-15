@@ -148,7 +148,7 @@ func (controller *VaccineSessionControllerImpl) GetCitizenAndFamilySelectedSessi
 	if err != nil {
 		return controllers.BadRequestResponse(c, http.StatusInternalServerError, err)
 	}
-	response := web.VaccineSessionCreateResponse{}
+	var response []web.VaccineSessionCreateResponse
 	copier.Copy(&response, &sessionData)
 
 	citizenIdString := strconv.Itoa(ctxCitizenId)

@@ -12,6 +12,4 @@ type VaccineSessionRepository interface {
 	FindById(ctx context.Context, id int) (records.VaccineSession, error)
 	FindSessionOwnedByHf(ctx context.Context, hfid int) ([]records.VaccineSession, error)
 	GetAllVaccineSession(ctx context.Context) ([]records.VaccineSession, error)
-	//GetExpiredSession(ctx context.Context) ([]records.VaccineSession, error)
-	//UpdateSessionStatus(ctx context.Context, hfid, id int, status string) error
 }
