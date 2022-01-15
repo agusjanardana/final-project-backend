@@ -31,3 +31,7 @@ func (vs VaccineSession) ValidateRequest() error {
 		validation.Field(&vs.SessionType, validation.Required),
 	)
 }
+
+type UniqueSession struct {
+	Id int
+}

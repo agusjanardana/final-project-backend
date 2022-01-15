@@ -84,9 +84,6 @@ func (service *VaccineSessionServiceImpl) DeleteSession(ctx context.Context, hfi
 	if err != nil {
 		return "", err
 	}
-	if byId.SessionType == "" {
-		return "", errors.New("data not found")
-	}
 
 	if byId.HealthFacilitatorId == hfid {
 		_, err = service.vaccineSessionRepository.Delete(ctx, id, hfid)
@@ -139,29 +136,45 @@ func (service *VaccineSessionServiceImpl) GetAllVaccineSession(ctx context.Conte
 	return response, nil
 }
 
-func (service *VaccineSessionServiceImpl) GetCitizenAndFamilySelectedSession(ctx context.Context, citizenId int) (VaccineSession, error) {
+func (service *VaccineSessionServiceImpl) GetCitizenAndFamilySelectedSession(ctx context.Context, citizenId int) ([]VaccineSession, error) {
 	citizenData, err := service.CitizenRepository.FindById(ctx, citizenId)
 	if err != nil {
-		return VaccineSession{}, err
+		return nil, err
 	}
 
 	familyData, err := service.FamilyRepository.GetCitizenOwnFamily(ctx, citizenData.Id)
 	if err != nil {
-		return VaccineSession{}, err
+		return nil, err
+	}
+	var uniqueSession []int
+	for _, v := range familyData{
+		skip := false
+		for _, u := range uniqueSession{
+			if v.VaccineSessionDetail.SessionId == u {
+				skip = true
+				break
+			}
+		}
+		if !skip{
+			temp := v.VaccineSessionDetail.SessionId
+			uniqueSession = append(uniqueSession,temp)
+		}
 	}
 
-	sessionId := familyData[0].VaccineSessionDetail.SessionId
-	if sessionId == 0 {
-		return VaccineSession{}, errors.New("this citizen and family not selected any vaccine session")
+	if len(uniqueSession) == 0{
+		return nil, errors.New("this citizen and family not selected any vaccine session")
 	}
 
-	data, err := service.vaccineSessionRepository.FindById(ctx, sessionId)
-	if err != nil {
-		return VaccineSession{}, err
+	data := make([]VaccineSession, len(uniqueSession))
+	for _ , v := range uniqueSession{
+		dataRepository, err := service.vaccineSessionRepository.FindById(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		translate := VaccineSession{}
+		copier.Copy(&translate, dataRepository)
+		data = append(data, translate)
 	}
 
-	response := VaccineSession{}
-	copier.Copy(&response, &data)
-
-	return response, nil
+	return data, nil
 }
