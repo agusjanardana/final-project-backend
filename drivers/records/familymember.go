@@ -14,6 +14,7 @@ type FamilyMember struct {
 	Gender               string `gorm:"not null"`
 	Age                  int    `gorm:"not null"`
 	Handphone            string `gorm:"not null"`
+	StatusVaccines       string `gorm:"default:'BELUM VAKSIN'"`
 	CitizenId            int
 	Address              string
 	VaccineSessionDetail VaccineSessionDetail `gorm:"foreignKey:FamilyMemberId;"`

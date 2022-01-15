@@ -7,4 +7,6 @@ type HealthFacilitatorController interface {
 	Login(c echo.Context) error
 	GetAllHealthFacilitator(c echo.Context) error
 	FindById(c echo.Context) error
+	HealthUpdateFamilyMemberStatus(c echo.Context) error
+	Update(c echo.Context) error
 }

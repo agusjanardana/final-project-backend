@@ -16,7 +16,6 @@ type Citizen struct {
 	Address         string
 	HandphoneNumber string
 	VaccinePass     string
-	StatusVaccines  string
 	Age             int
 	Gender          string
 	Birthday        time.Time

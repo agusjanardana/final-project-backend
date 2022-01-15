@@ -13,6 +13,7 @@ type FamilyMember struct {
 	Gender    string
 	Age       int
 	Handphone string
+	StatusVaccines  string
 	CitizenId int
 }
 

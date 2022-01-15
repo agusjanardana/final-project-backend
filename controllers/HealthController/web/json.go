@@ -60,3 +60,29 @@ type VaccineSessionDetail struct {
 	SessionId      int `json:"session_id"`
 	FamilyMemberId int `json:"family_member_id"`
 }
+
+type FamilyMemberUpdateStatusReq struct {
+	StatusVaccines string `json:"status_vaccines"`
+}
+
+type FamilyMemberResponse struct {
+	StatusVaccines string    `json:"status_vaccines"`
+}
+
+type HealthFaUpdateReq struct {
+	Name                      string `json:"facilitator_name"`
+	FacilitatorsCertification string `json:"facilitators_certification"`
+	Address                   string `json:"address"`
+	Longitude                 string `json:"longitude"`
+	Latitude                  string `json:"latitude"`
+	Type                      string `json:"type"`
+}
+
+type HealthFaUpdateRes struct {
+	Name                      string `json:"facilitator_name"`
+	FacilitatorsCertification string `json:"facilitators_certification"`
+	Address                   string `json:"address"`
+	Longitude                 string `json:"longitude"`
+	Latitude                  string `json:"latitude"`
+	Type                      string `json:"type"`
+}

@@ -46,7 +46,6 @@ type RespondFind struct {
 	Email           string         `json:"email"`
 	NIK             string         `json:"nik"`
 	HandphoneNumber string         `json:"handphone_number"`
-	StatusVaccines  string         `json:"status_vaccines"`
 	Age             int            `json:"age"`
 	Gender          string         `json:"gender"`
 	Birthday        time.Time      `json:"birthday"`
@@ -55,6 +54,7 @@ type RespondFind struct {
 }
 
 type FamilyMember struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	Id             int    `json:"id"`
+	Name           string `json:"name"`
+	StatusVaccines string `json:"status_vaccines"`
 }

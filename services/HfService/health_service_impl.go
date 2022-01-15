@@ -97,3 +97,24 @@ func (service *HealthServiceImpl) FindById(ctx context.Context, hfId int) (Healt
 	return response, nil
 }
 
+func (service *HealthServiceImpl) Update(ctx context.Context, hfId int, domain HealthFacilitator) (HealthFacilitator, error) {
+	dataFindById, err := service.HealthRepository.FindById(ctx, hfId)
+	if err != nil {
+		return HealthFacilitator{}, err
+	}
+
+	if dataFindById.Id == hfId {
+		entityRepo := records.HealthFacilitator{}
+		copier.Copy(&entityRepo, &domain)
+		dataRepo, err := service.HealthRepository.Update(ctx, hfId, entityRepo)
+		if err != nil {
+			return HealthFacilitator{}, err
+		}
+		response := HealthFacilitator{}
+		copier.Copy(&response, &dataRepo)
+
+		return response, nil
+	}
+
+	return HealthFacilitator{}, err
+}

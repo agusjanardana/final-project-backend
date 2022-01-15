@@ -9,4 +9,5 @@ type FamilyService interface {
 	GetCitizenOwnFamily(ctx context.Context, citizenId int) ([]FamilyMember, error)
 	Update(ctx context.Context, citizenId, id int, family FamilyMember) (FamilyMember, error)
 	Delete(ctx context.Context, id, citizenId int) (string, error)
+	HfUpdateStatusFamily(ctx context.Context, fmid int, domain FamilyMember) (FamilyMember, error)
 }

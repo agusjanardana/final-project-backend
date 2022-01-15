@@ -60,7 +60,7 @@ func (controller *VaccineSessionControllerImpl) GetSessionById(c echo.Context) e
 		return controllers.BadRequestResponse(c, http.StatusInternalServerError, err)
 	}
 
-	response := web.VaccineSessionCreateResponse{}
+	response := web.VaccineSessionFindByIdResponse{}
 	copier.Copy(&response, &data)
 	return controllers.NewSuccessResponse(c, response)
 }

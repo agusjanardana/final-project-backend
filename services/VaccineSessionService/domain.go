@@ -6,14 +6,21 @@ import (
 )
 
 type VaccineSession struct {
-	Id                  int
-	StartDate           time.Time
-	EndDate             time.Time
-	Quota               int
-	SessionType         string
-	VaccineId           int
-	HealthFacilitatorId int
-	Status              string
+	Id                   int
+	StartDate            time.Time
+	EndDate              time.Time
+	Quota                int
+	SessionType          string
+	VaccineId            int
+	HealthFacilitatorId  int
+	Status               string
+	VaccineSessionDetail []VaccineSessionDetail
+}
+
+type VaccineSessionDetail struct {
+	Id             int
+	SessionId      int
+	FamilyMemberId int
 }
 
 func (vs VaccineSession) ValidateRequest() error {

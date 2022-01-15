@@ -68,7 +68,7 @@ func (service *FamilyServiceImpl) GetCitizenOwnFamily(ctx context.Context, citiz
 	return response, nil
 }
 
-func (service *FamilyServiceImpl) Update(ctx context.Context, citizenId , id int, family FamilyMember) (FamilyMember, error) {
+func (service *FamilyServiceImpl) Update(ctx context.Context, citizenId, id int, family FamilyMember) (FamilyMember, error) {
 	if len(string(rune(id))) == 0 {
 		return family, errors.New("id cannot be blank")
 	}
@@ -77,7 +77,7 @@ func (service *FamilyServiceImpl) Update(ctx context.Context, citizenId , id int
 	if err != nil {
 		return FamilyMember{}, err
 	}
-	if data.CitizenId != citizenId{
+	if data.CitizenId != citizenId {
 		return FamilyMember{}, errors.New("this family doesn't belongs to you, cannot update")
 	}
 
@@ -105,7 +105,7 @@ func (service *FamilyServiceImpl) Delete(ctx context.Context, id int, citizenId 
 	}
 
 	if byId.CitizenId == citizenId {
-		_ , err := service.FamilyRepository.Delete(ctx, id,citizenId)
+		_, err := service.FamilyRepository.Delete(ctx, id, citizenId)
 		if err != nil {
 			return "", err
 		}
@@ -113,4 +113,27 @@ func (service *FamilyServiceImpl) Delete(ctx context.Context, id int, citizenId 
 		return "", errors.New("this family is not belongs to you")
 	}
 	return "success delete data", nil
+}
+
+func (service *FamilyServiceImpl) HfUpdateStatusFamily(ctx context.Context, fmid int, domain FamilyMember) (FamilyMember, error) {
+	dataRepo, err := service.FamilyRepository.GetFamilyById(ctx, fmid)
+	if err != nil {
+		return FamilyMember{}, err
+	}
+
+	if dataRepo.Id == fmid {
+		entityRepo := records.FamilyMember{}
+		copier.Copy(&entityRepo, &domain)
+
+		dataRepoFamily, err := service.FamilyRepository.Update(ctx, fmid, entityRepo)
+		if err != nil {
+			return FamilyMember{}, err
+		}
+
+		entityResponse := FamilyMember{}
+		copier.Copy(&entityResponse, &dataRepoFamily)
+
+		return entityResponse, nil
+	}
+	return FamilyMember{}, err
 }

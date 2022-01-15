@@ -62,15 +62,15 @@ func main() {
 		ExpiredIn: EXPIRED,
 	}
 
-	//HealthFa
-	healthRepo := HealthRepository.NewHealthRepository(mysqlClient)
-	healthServ := HfService.NewHealthService(healthRepo, &configJWT)
-	healthCtrl := HealthController.NewHealthFacilitatorsController(healthServ)
-
 	//Family
 	familyRepo := FamilyRepository.NewFamilyRepository(mysqlClient)
 	familyServ := FamilyService.NewFamilyService(familyRepo)
 	familyCtrl := FamilyController.NewFamilyControllerImpl(familyServ)
+
+	//HealthFa
+	healthRepo := HealthRepository.NewHealthRepository(mysqlClient)
+	healthServ := HfService.NewHealthService(healthRepo, &configJWT)
+	healthCtrl := HealthController.NewHealthFacilitatorsController(healthServ, familyServ)
 
 	//citizen
 	citizenRepo := CitizenRepository.NewCitizenRepository(mysqlClient)

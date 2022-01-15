@@ -1,7 +1,7 @@
 package web
 
 type SessionDetailDo struct {
-	Id             int
-	SessionId      int
-	FamilyMemberId int
+	Id             int `json:"id"`
+	SessionId      int `json:"session_id"`
+	FamilyMemberId int `json:"family_member_id"`
 }

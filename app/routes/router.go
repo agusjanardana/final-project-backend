@@ -36,6 +36,8 @@ func (c1 *ControllerList) Registration(e *echo.Echo) {
 	apiV1.POST("/admin/logins", c1.HealthController.Login)
 	apiV1.GET("/admins", c1.HealthController.GetAllHealthFacilitator)
 	apiV1.GET("/admin/:id", c1.HealthController.FindById)
+	apiV1.PUT("/admin/:id", c1.HealthController.Update, middleware.JWTWithConfig(c1.JWTMiddleware))
+	apiV1.PUT("/admin/family/:id", c1.HealthController.HealthUpdateFamilyMemberStatus, middleware.JWTWithConfig(c1.JWTMiddleware))
 
 	//  FAMILY THINGS
 	apiV1.GET("/families/:id", c1.FamilyController.GetFamilyById, middleware.JWTWithConfig(c1.JWTMiddleware))
@@ -59,6 +61,9 @@ func (c1 *ControllerList) Registration(e *echo.Echo) {
 	apiV1.PUT("/vaccine/session/:id", c1.VaccineSessionController.UpdateSession, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.GET("/vaccine/sessions", c1.VaccineSessionController.GetAllVaccineSession, middleware.JWTWithConfig(c1.JWTMiddleware))
 
-	// Booking Session
+	// Booking Session Detail
 	apiV1.POST("/session/bookings/:id", c1.VaccineDetailController.CitizenChooseSession, middleware.JWTWithConfig(c1.JWTMiddleware))
+	apiV1.GET("/session/family/:id", c1.VaccineDetailController.GetDetailByFamilyId, middleware.JWTWithConfig(c1.JWTMiddleware))
+	apiV1.GET("/session/detail/:id", c1.VaccineDetailController.GetDetailById, middleware.JWTWithConfig(c1.JWTMiddleware))
+	apiV1.GET("/session/:id", c1.VaccineDetailController.GetDetailBySessionId, middleware.JWTWithConfig(c1.JWTMiddleware))
 }
