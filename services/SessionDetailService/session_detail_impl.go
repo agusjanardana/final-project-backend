@@ -3,6 +3,7 @@ package SessionDetailService
 import (
 	"context"
 	"errors"
+	"github.com/jinzhu/copier"
 	"vaccine-app-be/drivers/records"
 	"vaccine-app-be/drivers/repository/FamilyRepository"
 	"vaccine-app-be/drivers/repository/VaccineSessionDetailRepository"
@@ -35,7 +36,7 @@ func (service *SessionDetailImpl) CitizenChooseSession(ctx context.Context, citi
 		return nil, errors.New("session doesn't exist")
 	}
 
-	if dataSession.Quota == 0{
+	if dataSession.Quota == 0 {
 		return nil, errors.New("session quota is full")
 	}
 
@@ -56,7 +57,6 @@ func (service *SessionDetailImpl) CitizenChooseSession(ctx context.Context, citi
 			data[i].FamilyMemberId = create.FamilyMemberId
 		}
 
-
 		//kurangi jumlah quota di DB untuk data realtime.
 		entitySession := records.VaccineSession{}
 		entitySession.Quota = dataSession.Quota - countFamily
@@ -66,4 +66,39 @@ func (service *SessionDetailImpl) CitizenChooseSession(ctx context.Context, citi
 		}
 		return data, nil
 	}
+}
+
+func (service *SessionDetailImpl) GetDetailBySessionId(ctx context.Context, sessionId int) ([]SessionDetailDo, error) {
+	data, err := service.sessionDetail.GetDetailBySessionId(ctx, sessionId)
+	if err != nil {
+		return nil, err
+	}
+	var response []SessionDetailDo
+	copier.Copy(&response, &data)
+
+	return response, nil
+}
+
+func (service *SessionDetailImpl) GetDetailById(ctx context.Context, id int) (SessionDetailDo, error) {
+	data, err := service.sessionDetail.GetDetailById(ctx, id)
+	if err != nil {
+		return SessionDetailDo{}, err
+
+	}
+	response := SessionDetailDo{}
+	copier.Copy(&response, &data)
+
+	return response, nil
+}
+
+func (service *SessionDetailImpl) GetDetailByFamilyId(ctx context.Context, fmid int) ([]SessionDetailDo, error) {
+	data, err := service.sessionDetail.GetDetailByFamilyId(ctx, fmid)
+	if err != nil {
+		return nil, err
+	}
+
+	var response []SessionDetailDo
+	copier.Copy(&response, &data)
+	return response, nil
+
 }

@@ -59,7 +59,7 @@ func (repository *VaccineSessionRepositoryImpl) Delete(ctx context.Context, id, 
 
 func (repository *VaccineSessionRepositoryImpl) FindById(ctx context.Context, id int) (records.VaccineSession, error) {
 	var record records.VaccineSession
-	data := repository.client.Conn().WithContext(ctx).Where("id = ?", id).Find(&record)
+	data := repository.client.Conn().WithContext(ctx).Preload("VaccineSessionDetail").Where("id = ?", id).Find(&record)
 	if data.RowsAffected == 0 {
 		return records.VaccineSession{}, errors.New("data not found")
 	}

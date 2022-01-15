@@ -168,6 +168,26 @@ func TestUpdate(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, updateData.Birthday, domain.Birthday)
 	})
+
+	t.Run("test case 1, invalid update#1", func(t *testing.T) {
+		ctxId := 1
+		birthdays := time.Now()
+		domain := Citizen{
+			Birthday: birthdays,
+			Address:  "jalan",
+		}
+
+		expectedReturn := records.Citizen{Address: "jalan"}
+		expectedReturn.Birthday.Scan(birthdays)
+		errors := errors.New("data not found")
+
+		citizenRepository.On("Update", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("time.Time"), mock.AnythingOfType("string")).Return(expectedReturn, nil).Once()
+		familyRepository.On("GetCitizenOwnFamily", mock.Anything, mock.AnythingOfType("int")).Return([]records.FamilyMember{}, errors).Once()
+
+		_ , err := CitizenService.Update(context.Background(), ctxId, domain.Birthday, domain.Address)
+		assert.Equal(t, err, errors)
+
+	})
 }
 
 func TestFindById(t *testing.T) {
@@ -185,7 +205,6 @@ func TestFindById(t *testing.T) {
 			Gender:          "Male",
 			Age:             13,
 			VaccinePass:     "ADa",
-			StatusVaccines:  "Ada",
 		}
 
 		citizenRepository.On("FindById", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturn, nil).Once()
@@ -194,4 +213,14 @@ func TestFindById(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, dataCitizen.Name, expectedReturn.Name)
 	})
+
+	t.Run("test case 1, data not found", func(t *testing.T) {
+		ctxId := 1
+		errors := errors.New("data not found")
+		citizenRepository.On("FindById", mock.Anything, mock.AnythingOfType("int")).Return(records.Citizen{}, errors).Once()
+
+		_, err := CitizenService.CitizenFindById(context.Background(), ctxId)
+		assert.Equal(t, err, errors)
+	})
+
 }

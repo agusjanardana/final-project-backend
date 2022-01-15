@@ -50,3 +50,11 @@ func (repository *HealthRepositoryImpl) FindById(ctx context.Context, hfId int) 
 	}
 	return healthF, nil
 }
+
+func (repository *HealthRepositoryImpl) Update(ctx context.Context, hfId int, record records.HealthFacilitator) (records.HealthFacilitator, error) {
+	err := repository.client.Conn().WithContext(ctx).Where("id = ?", hfId).Updates(&record).Error
+	if err != nil {
+		return records.HealthFacilitator{}, err
+	}
+	return record, nil
+}

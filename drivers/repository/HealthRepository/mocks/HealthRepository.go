@@ -99,3 +99,24 @@ func (_m *HealthRepository) Register(ctx context.Context, healthF records.Health
 
 	return r0, r1
 }
+
+// Update provides a mock function with given fields: ctx, hfId, record
+func (_m *HealthRepository) Update(ctx context.Context, hfId int, record records.HealthFacilitator) (records.HealthFacilitator, error) {
+	ret := _m.Called(ctx, hfId, record)
+
+	var r0 records.HealthFacilitator
+	if rf, ok := ret.Get(0).(func(context.Context, int, records.HealthFacilitator) records.HealthFacilitator); ok {
+		r0 = rf(ctx, hfId, record)
+	} else {
+		r0 = ret.Get(0).(records.HealthFacilitator)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, int, records.HealthFacilitator) error); ok {
+		r1 = rf(ctx, hfId, record)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}

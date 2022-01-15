@@ -33,11 +33,11 @@ func TestRegister(t *testing.T) {
 	HealthService := setup()
 	t.Run("test case 1, valid test for register", func(t *testing.T) {
 		domain := HealthFacilitator{
-			Name:     "agus",
-			Email:    "bjanardana@yahoo.com",
-			Password: "123456",
-			Address: "123asd",
-			Latitude: "123asdas",
+			Name:      "agus",
+			Email:     "bjanardana@yahoo.com",
+			Password:  "123456",
+			Address:   "123asd",
+			Latitude:  "123asdas",
 			Longitude: "asdasd",
 		}
 		expectedReturn := records.HealthFacilitator{
@@ -54,11 +54,11 @@ func TestRegister(t *testing.T) {
 
 	t.Run("test case 2, email already used", func(t *testing.T) {
 		domain := HealthFacilitator{
-			Name:     "agus",
-			Email:    "bjanardana@yahoo.com",
-			Password: "123456",
-			Address: "123asd",
-			Latitude: "123asdas",
+			Name:      "agus",
+			Email:     "bjanardana@yahoo.com",
+			Password:  "123456",
+			Address:   "123asd",
+			Latitude:  "123asdas",
 			Longitude: "asdasd",
 		}
 		expectedReturn := records.HealthFacilitator{
@@ -75,11 +75,11 @@ func TestRegister(t *testing.T) {
 
 	t.Run("test case 3, validation testing", func(t *testing.T) {
 		domain := HealthFacilitator{
-			Name:     "agus",
-			Email:    "bjanardana@yahoo.com",
-			Password: "123456",
-			Address: "123asd",
-			Latitude: "123asdas",
+			Name:      "agus",
+			Email:     "bjanardana@yahoo.com",
+			Password:  "123456",
+			Address:   "123asd",
+			Latitude:  "123asdas",
 			Longitude: "asdasd",
 		}
 		expectedReturn := records.HealthFacilitator{
@@ -126,16 +126,16 @@ func TestLogin(t *testing.T) {
 	})
 }
 
-func TestGetAllHf(t *testing.T){
+func TestGetAllHf(t *testing.T) {
 	HealthService := setup()
 	t.Run("test case 1, success login", func(t *testing.T) {
 		expectedReturn := []records.HealthFacilitator{
 			{
-				Name: "RS A",
+				Name:    "RS A",
 				Address: "Jalan Kembang",
 			},
 			{
-				Name: "RS B",
+				Name:    "RS B",
 				Address: "Jalan Melayu",
 			},
 		}
@@ -145,5 +145,68 @@ func TestGetAllHf(t *testing.T){
 		facilitatorData, err := HealthService.GetAllHealthFacilitator(context.Background())
 		assert.Nil(t, err)
 		assert.Equal(t, facilitatorData[0].Name, expectedReturn[0].Name)
+	})
+}
+
+func TestFindById(t *testing.T) {
+	HealthService := setup()
+	t.Run("test case 1, success find by id", func(t *testing.T) {
+		Id := 1
+		expectedReturn := records.HealthFacilitator{
+			Id:        1,
+			Name:      "agus",
+			Email:     "bjanardana@yahoo.com",
+			Password:  "123456",
+			Address:   "123asd",
+			Latitude:  "123asdas",
+			Longitude: "asdasd",
+		}
+		healthRepository.On("FindById", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturn, nil).Once()
+
+		dataService, err := HealthService.FindById(context.Background(), Id)
+		assert.Nil(t, err)
+		assert.Equal(t, dataService.Id, expectedReturn.Id)
+
+	})
+}
+
+func TestHfUpdate(t *testing.T) {
+	HealthService := setup()
+	t.Run("test case 1, success update", func(t *testing.T) {
+		hfid := 1
+		domain := HealthFacilitator{
+			Id:        1,
+			Name:      "agusEDIT",
+			Email:     "bjanardana@yahoo.com",
+			Password:  "123456",
+			Address:   "123asd",
+			Latitude:  "123asdas",
+			Longitude: "asdasd",
+		}
+		expectedReturn := records.HealthFacilitator{
+			Id:        1,
+			Name:      "agus",
+			Email:     "bjanardana@yahoo.com",
+			Password:  "123456",
+			Address:   "123asd",
+			Latitude:  "123asdas",
+			Longitude: "asdasd",
+		}
+
+		expectedReturnEdit := records.HealthFacilitator{
+			Id:        1,
+			Name:      "agusEDIT",
+			Email:     "bjanardana@yahoo.com",
+			Password:  "123456",
+			Address:   "123asd",
+			Latitude:  "123asdas",
+			Longitude: "asdasd",
+		}
+		healthRepository.On("FindById", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturn, nil).Once()
+		healthRepository.On("Update", mock.Anything, mock.AnythingOfType("int"), mock.Anything).Return(expectedReturnEdit, nil).Once()
+
+		updateData, err := HealthService.Update(context.Background(), hfid, domain)
+		assert.Nil(t, err)
+		assert.Equal(t, updateData.Name, expectedReturnEdit.Name)
 	})
 }

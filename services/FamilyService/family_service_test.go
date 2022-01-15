@@ -203,6 +203,80 @@ func TestDelete(t *testing.T) {
 		s, err := FamilyService.Delete(context.Background(), familyId, citizenId)
 		assert.Nil(t, err)
 		assert.Equal(t, s, "success delete data")
+	})
 
+	t.Run("test case 2, family member not found", func(t *testing.T) {
+		citizenId := 1
+		familyId := 1
+		errors := errors.New("data not found")
+
+		familyRepository.On("GetFamilyById", mock.Anything, mock.AnythingOfType("int")).Return(records.FamilyMember{}, errors).Once()
+		_, err := FamilyService.Delete(context.Background(), familyId, citizenId)
+		assert.Equal(t, err, errors)
+
+	})
+
+	t.Run("test case 3, family member doesnt belongs to citizen", func(t *testing.T) {
+		citizenId := 1
+		familyId := 1
+		expectedReturn := records.FamilyMember{
+			Id:        1,
+			Name:      "Agus",
+			Birthday:  time.Now(),
+			Nik:       "123123asd",
+			Gender:    "Male",
+			Age:       15,
+			Handphone: "087523123123",
+			CitizenId: 2,
+		}
+		errors := errors.New("this family is not belongs to you")
+		familyRepository.On("GetFamilyById", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturn, nil).Once()
+
+		_, err := FamilyService.Delete(context.Background(), familyId, citizenId)
+		assert.Equal(t, err, errors)
+	})
+}
+
+func TestHfUpdateStatusFamily(t *testing.T) {
+	FamilyService := setup()
+	t.Run("test case 1, healthfacilitators success update family member status", func(t *testing.T) {
+		fmId := 1
+		domain := FamilyMember{
+			StatusVaccines: "DOSIS 1",
+		}
+
+		expectedReturn := records.FamilyMember{
+			Id:             1,
+			Name:           "Agus",
+			Birthday:       time.Now(),
+			Nik:            "123123asd",
+			Gender:         "Male",
+			Age:            15,
+			Handphone:      "087523123123",
+			CitizenId:      1,
+			StatusVaccines: "BELUM VACCINES",
+		}
+
+		expectedReturnEdit := records.FamilyMember{
+			StatusVaccines: "DOSIS 1",
+		}
+
+		familyRepository.On("GetFamilyById", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturn, nil).Once()
+		familyRepository.On("Update", mock.Anything, mock.AnythingOfType("int"), mock.Anything).Return(expectedReturnEdit, nil).Once()
+		dataService, err := FamilyService.HfUpdateStatusFamily(context.Background(), fmId, domain)
+		assert.Nil(t, err)
+		assert.Equal(t, dataService.StatusVaccines, expectedReturnEdit.StatusVaccines)
+	})
+
+	t.Run("test case 2, healthfacilitators failed family not found", func(t *testing.T) {
+		fmid := 1
+		domain := FamilyMember{
+			StatusVaccines: "DOSIS 1",
+		}
+		errors := errors.New("data not found")
+		familyRepository.On("GetFamilyById", mock.Anything, mock.AnythingOfType("int")).Return(records.FamilyMember{}, errors).Once()
+
+		_, err := FamilyService.HfUpdateStatusFamily(context.Background(), fmid, domain)
+		assert.Equal(t, err, errors)
 	})
 }
