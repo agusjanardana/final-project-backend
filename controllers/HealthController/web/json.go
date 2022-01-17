@@ -27,6 +27,7 @@ type HealthFaLoginRequest struct {
 }
 
 type HealthFacilitator struct {
+	Id             int              `json:"id"`
 	Name           string           `json:"name"`
 	Address        string           `json:"address"`
 	Longitude      string           `json:"longitude"`
@@ -66,7 +67,7 @@ type FamilyMemberUpdateStatusReq struct {
 }
 
 type FamilyMemberResponse struct {
-	StatusVaccines string    `json:"status_vaccines"`
+	StatusVaccines string `json:"status_vaccines"`
 }
 
 type HealthFaUpdateReq struct {

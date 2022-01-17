@@ -22,4 +22,5 @@ type FamilyMemberResponse struct {
 	Gender         string    `json:"gender"`
 	Age            int       `json:"age"`
 	Handphone      string    `json:"handphone"`
+	CitizenId      int       `json:"citizen_id"`
 }
