@@ -4,6 +4,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strconv"
 	"vaccine-app-be/app/middleware"
 	"vaccine-app-be/controllers"
 	"vaccine-app-be/controllers/CitizenController/web"
@@ -78,9 +79,12 @@ func (citizenCtrl *CitizenControllerImpl) Update(c echo.Context) error {
 
 func (citizenCtrl *CitizenControllerImpl) FindCitizenById(c echo.Context) error {
 	ctx := c.Request().Context()
-	ctxCitizenId := middleware.GetUserId(c)
-
-	citizenData, err := citizenCtrl.citizenService.CitizenFindById(ctx, ctxCitizenId)
+	id := c.Param("id")
+	dataToInteger, err := strconv.Atoi(id)
+	if err != nil {
+		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
+	}
+	citizenData, err := citizenCtrl.citizenService.CitizenFindById(ctx, dataToInteger)
 	if err != nil {
 		return controllers.InternalServerError(c, http.StatusInternalServerError, err)
 	}
