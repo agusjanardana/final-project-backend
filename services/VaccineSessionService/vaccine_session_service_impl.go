@@ -147,26 +147,27 @@ func (service *VaccineSessionServiceImpl) GetCitizenAndFamilySelectedSession(ctx
 		return nil, err
 	}
 	var uniqueSession []int
-	for _, v := range familyData{
+	for _, v := range familyData {
 		skip := false
-		for _, u := range uniqueSession{
+		for _, u := range uniqueSession {
 			if v.VaccineSessionDetail.SessionId == u {
 				skip = true
 				break
 			}
 		}
-		if !skip{
+		if !skip {
 			temp := v.VaccineSessionDetail.SessionId
-			uniqueSession = append(uniqueSession,temp)
+			uniqueSession = append(uniqueSession, temp)
 		}
 	}
 
-	if len(uniqueSession) == 0{
+	if len(uniqueSession) == 0 {
 		return nil, errors.New("this citizen and family not selected any vaccine session")
 	}
 
-	data := make([]VaccineSession, len(uniqueSession))
-	for _ , v := range uniqueSession{
+
+	data := make([]VaccineSession, len(uniqueSession)-1)
+	for _, v := range uniqueSession {
 		dataRepository, err := service.vaccineSessionRepository.FindById(ctx, v)
 		if err != nil {
 			return nil, err

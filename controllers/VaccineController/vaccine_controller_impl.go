@@ -107,10 +107,10 @@ func (controller *VaccineControllerImpl) Delete(c echo.Context) error {
 func (controller *VaccineControllerImpl) FindVaccineById(c echo.Context) error {
 	ctx := c.Request().Context()
 	vaccineId := c.Param("id")
-	ctxRole := middleware.GetUserRoles(c)
-	if ctxRole != "ADMIN" {
-		return controllers.ForbiddenRequest(c, http.StatusForbidden, errors.New("doesn't have access"))
-	}
+	//ctxRole := middleware.GetUserRoles(c)
+	//if ctxRole != "ADMIN" {
+	//	return controllers.ForbiddenRequest(c, http.StatusForbidden, errors.New("doesn't have access"))
+	//}
 	atoi, err := strconv.Atoi(vaccineId)
 	if err != nil {
 		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
@@ -127,11 +127,11 @@ func (controller *VaccineControllerImpl) FindVaccineById(c echo.Context) error {
 
 func (controller *VaccineControllerImpl) FindVaccineOwnedByHF(c echo.Context) error {
 	ctx := c.Request().Context()
-	ctxRole := middleware.GetUserRoles(c)
+	//ctxRole := middleware.GetUserRoles(c)
 	//ctxHfId := middleware.GetUserId(c)
-	if ctxRole != "ADMIN" {
-		return controllers.ForbiddenRequest(c, http.StatusForbidden, errors.New("doesn't have access"))
-	}
+	//if ctxRole != "ADMIN" {
+	//	return controllers.ForbiddenRequest(c, http.StatusForbidden, errors.New("doesn't have access"))
+	//}
 
 	idParam := c.Param("id")
 	dataToInteger, err := strconv.Atoi(idParam)

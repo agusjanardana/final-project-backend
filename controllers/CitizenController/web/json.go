@@ -8,22 +8,24 @@ import (
 
 //response
 type ResponseRegister struct {
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	NIK             string `json:"nik"`
-	HandphoneNumber string `json:"handphone_number"`
-	Age             int    `json:"age"`
-	Gender          string `json:"gender"`
+	Name            string    `json:"name"`
+	Email           string    `json:"email"`
+	NIK             string    `json:"nik"`
+	HandphoneNumber string    `json:"handphone_number"`
+	Birthday        time.Time `json:"birthday"`
+	Age             int       `json:"age"`
+	Gender          string    `json:"gender"`
 }
 
 type RequestRegister struct {
-	Email           string `json:"email"`
-	Password        string `json:"password"`
-	Name            string `json:"name"`
-	NIK             string `json:"nik"`
-	HandphoneNumber string `json:"handphone_number"`
-	Age             int    `json:"age"`
-	Gender          string `json:"gender"`
+	Email           string    `json:"email"`
+	Password        string    `json:"password"`
+	Birthday        time.Time `json:"birthday"`
+	Name            string    `json:"name"`
+	NIK             string    `json:"nik"`
+	HandphoneNumber string    `json:"handphone_number"`
+	Age             int       `json:"age"`
+	Gender          string    `json:"gender"`
 }
 
 type CitizenLoginRequest struct {
