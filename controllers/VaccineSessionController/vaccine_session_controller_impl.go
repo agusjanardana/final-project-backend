@@ -9,15 +9,20 @@ import (
 	"vaccine-app-be/app/middleware"
 	"vaccine-app-be/controllers"
 	"vaccine-app-be/controllers/VaccineSessionController/web"
+	"vaccine-app-be/services/HfService"
+	"vaccine-app-be/services/VaccineService"
 	"vaccine-app-be/services/VaccineSessionService"
 )
 
 type VaccineSessionControllerImpl struct {
 	vaccineSessionService VaccineSessionService.VaccineSessionService
+	healthService         HfService.HealthService
+	vaccineService        VaccineService.VaccineService
 }
 
-func NewVaccineSessionController(vaccineSessionService VaccineSessionService.VaccineSessionService) VaccineSessionController {
-	return &VaccineSessionControllerImpl{vaccineSessionService: vaccineSessionService}
+func NewVaccineSessionController(vaccineSessionService VaccineSessionService.VaccineSessionService, healthService HfService.HealthService, vaccineService VaccineService.VaccineService,
+) VaccineSessionController {
+	return &VaccineSessionControllerImpl{vaccineSessionService: vaccineSessionService, healthService: healthService, vaccineService: vaccineService}
 }
 
 func (controller *VaccineSessionControllerImpl) CreateSession(c echo.Context) error {
@@ -40,7 +45,7 @@ func (controller *VaccineSessionControllerImpl) CreateSession(c echo.Context) er
 	copier.Copy(&entityService, &req)
 	session, err := controller.vaccineSessionService.CreateSession(ctx, entityService)
 	if err != nil {
-		return controllers.BadRequestResponse(c, http.StatusNotAcceptable,err)
+		return controllers.BadRequestResponse(c, http.StatusNotAcceptable, err)
 	}
 	response := web.VaccineSessionCreateResponse{}
 	copier.Copy(&response, &session)
@@ -148,8 +153,22 @@ func (controller *VaccineSessionControllerImpl) GetCitizenAndFamilySelectedSessi
 	if err != nil {
 		return controllers.BadRequestResponse(c, http.StatusInternalServerError, err)
 	}
-	var response []web.VaccineSessionCreateResponse
-	copier.Copy(&response, &sessionData)
+	var response []web.VaccineSessionCreateResponseOwnedCitizen
+	copier.Copy(&response, sessionData)
+	for i:=0 ; i<len(response); i++ {
+		dataVaccine, err := controller.vaccineService.FindVaccineById(ctx, sessionData[i].VaccineId)
+		if err != nil {
+			response[i].Vaccine.Name = "not found"
+		}
+		healthFacilitator, err := controller.healthService.FindById(ctx, sessionData[i].HealthFacilitatorId)
+		if err != nil {
+			response[i].HealthFacilitator.Address = "not found"
+			response[i].HealthFacilitator.Name = "not found"
+		}
+		response[i].Vaccine.Name = dataVaccine.Name
+		response[i].HealthFacilitator.Address = healthFacilitator.Address
+		response[i].HealthFacilitator.Name = healthFacilitator.Name
+	}
 
 	citizenIdString := strconv.Itoa(ctxCitizenId)
 	return controllers.NewSuccessResponse(c, echo.Map{
