@@ -10,4 +10,5 @@ type CitizenService interface {
 	Login(ctx context.Context, email, password string) (string, error)
 	Update(ctx context.Context, userId int, birthDay time.Time, address string) (Citizen, error)
 	CitizenFindById(ctx context.Context, userId int) (Citizen, error)
+	GetCitizenRelationWithHealthFacilitators(ctx context.Context, hfId int)([]Citizen, error)
 }

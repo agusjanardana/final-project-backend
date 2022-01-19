@@ -7,4 +7,5 @@ type CitizenController interface {
 	Login(c echo.Context) error
 	Update(c echo.Context) error
 	FindCitizenById(c echo.Context) error
+	GetCitizenRelationWithHealthFacilitators(c echo.Context) error
 }

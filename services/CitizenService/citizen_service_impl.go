@@ -11,20 +11,27 @@ import (
 	"vaccine-app-be/drivers/records"
 	"vaccine-app-be/drivers/repository/CitizenRepository"
 	"vaccine-app-be/drivers/repository/FamilyRepository"
+	"vaccine-app-be/drivers/repository/VaccineSessionDetailRepository"
+	"vaccine-app-be/drivers/repository/VaccineSessionRepository"
 	"vaccine-app-be/utilities"
 )
 
 type CitizenServiceImpl struct {
-	CitizenRepository CitizenRepository.CitizenRepository
-	jwtAuth           *middleware.ConfigJWT
-	FamilyRepository  FamilyRepository.FamilyRepository
+	CitizenRepository        CitizenRepository.CitizenRepository
+	jwtAuth                  *middleware.ConfigJWT
+	FamilyRepository         FamilyRepository.FamilyRepository
+	vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository
+	sessionDetail            VaccineSessionDetailRepository.VaccineSessionDetail
 }
 
-func NewCitizenService(CitizenRepository CitizenRepository.CitizenRepository, jwtAuth *middleware.ConfigJWT, FamilyRepository FamilyRepository.FamilyRepository) CitizenService {
+func NewCitizenService(CitizenRepository CitizenRepository.CitizenRepository, jwtAuth *middleware.ConfigJWT, FamilyRepository FamilyRepository.FamilyRepository, vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository, sessionDetail VaccineSessionDetailRepository.VaccineSessionDetail,
+) CitizenService {
 	return &CitizenServiceImpl{
-		CitizenRepository: CitizenRepository,
-		jwtAuth:           jwtAuth,
-		FamilyRepository:  FamilyRepository,
+		CitizenRepository:        CitizenRepository,
+		jwtAuth:                  jwtAuth,
+		FamilyRepository:         FamilyRepository,
+		vaccineSessionRepository: vaccineSessionRepository,
+		sessionDetail:            sessionDetail,
 	}
 }
 
@@ -117,3 +124,49 @@ func (service *CitizenServiceImpl) CitizenFindById(ctx context.Context, userId i
 	return entityCitizenRespond, nil
 }
 
+func (service *CitizenServiceImpl) GetCitizenRelationWithHealthFacilitators(ctx context.Context, hfId int) ([]Citizen, error) {
+	dataSessionHf, err := service.vaccineSessionRepository.FindSessionOwnedByHf(ctx, hfId)
+	if err != nil {
+		return nil, err
+	}
+
+	var idFamily []int
+	for i := 0; i < len(dataSessionHf); i++ {
+		dataDetail, err := service.sessionDetail.GetDetailBySessionId(ctx, dataSessionHf[i].Id)
+		if err != nil {
+			return nil, err
+		}
+		idFamily = append(idFamily, dataDetail[i].FamilyMemberId)
+	}
+
+	var idCitizen []int
+	for i := 0; i < len(idFamily); i++ {
+		dataFamily, err := service.FamilyRepository.GetFamilyById(ctx, idFamily[i])
+		if err != nil {
+			return nil, err
+		}
+
+		skip := false
+		for _, u := range idCitizen {
+			if dataFamily.CitizenId == u{
+				skip = true
+				break
+			}
+		}
+		if !skip{
+			idCitizen = append(idCitizen, dataFamily.CitizenId)
+		}
+	}
+
+	data := make([]Citizen, len(idCitizen)-1)
+	for i := 0;i < len(idCitizen); i++ {
+		dataCitizenRepo, err := service.CitizenRepository.FindById(ctx, idCitizen[i])
+		if err != nil {
+			return nil, err
+		}
+		response := Citizen{}
+		copier.Copy(&response, &dataCitizenRepo)
+		data = append(data, response)
+	}
+	return data, nil
+}

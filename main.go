@@ -72,25 +72,28 @@ func main() {
 	healthServ := HfService.NewHealthService(healthRepo, &configJWT)
 	healthCtrl := HealthController.NewHealthFacilitatorsController(healthServ, familyServ)
 
-	//citizen
-	citizenRepo := CitizenRepository.NewCitizenRepository(mysqlClient)
-	citizenServ := CitizenService.NewCitizenService(citizenRepo, &configJWT, familyRepo)
-	citizenCtrl := CitizenController.NewCitizenController(citizenServ)
-
 	//vaccine
 	vaccineRepo := VaccineRepository.NewVaccineRepository(mysqlClient)
 	vaccineServ := VaccineService.NewVaccineRepository(vaccineRepo)
 	vaccineCtrl := VaccineController.NewVaccineController(vaccineServ)
 
-	//session
 	sessionRepo := VaccineSessionRepository.NewVaccineSessionRepository(mysqlClient)
+	detailRepo := VaccineSessionDetailRepository.NewSessionDetail(mysqlClient)
+
+	//citizen
+	citizenRepo := CitizenRepository.NewCitizenRepository(mysqlClient)
+	citizenServ := CitizenService.NewCitizenService(citizenRepo, &configJWT, familyRepo, sessionRepo, detailRepo)
+	citizenCtrl := CitizenController.NewCitizenController(citizenServ)
+
+	//session
 	sessionServ := VaccineSessionService.NewSessionService(sessionRepo, vaccineRepo, familyRepo, citizenRepo)
 	sessionCtrl := VaccineSessionController.NewVaccineSessionController(sessionServ, healthServ, vaccineServ)
 
 	//detail
-	detailRepo := VaccineSessionDetailRepository.NewSessionDetail(mysqlClient)
 	detailServ := SessionDetailService.NewSessionDetail(detailRepo, familyRepo, sessionRepo)
 	detailCtrl := VaccineDetailController.NewSessionDetailController(detailServ)
+
+
 
 	routesInit := routes.ControllerList{
 		JWTMiddleware:            configJWT.Init(),
