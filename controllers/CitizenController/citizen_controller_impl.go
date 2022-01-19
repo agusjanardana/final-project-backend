@@ -1,6 +1,7 @@
 package CitizenController
 
 import (
+	"errors"
 	"github.com/jinzhu/copier"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -90,6 +91,24 @@ func (citizenCtrl *CitizenControllerImpl) FindCitizenById(c echo.Context) error 
 	}
 	response := web.RespondFind{}
 	copier.Copy(&response, &citizenData)
+
+	return controllers.NewSuccessResponse(c, response)
+}
+
+func (citizenCtrl *CitizenControllerImpl) GetCitizenRelationWithHealthFacilitators(c echo.Context) error {
+	ctx := c.Request().Context()
+	id := c.Param("id")
+	dataToInteger, err := strconv.Atoi(id)
+	if err != nil {
+		return controllers.BadRequestResponse(c, http.StatusBadRequest, err)
+	}
+	facilitatorsData, err := citizenCtrl.citizenService.GetCitizenRelationWithHealthFacilitators(ctx, dataToInteger)
+	if err != nil {
+		return controllers.BadRequestResponse(c, http.StatusNotFound, errors.New("no citizen related with facilitators"))
+	}
+
+	var response []web.RespondFind
+	copier.Copy(&response, &facilitatorsData)
 
 	return controllers.NewSuccessResponse(c, response)
 }

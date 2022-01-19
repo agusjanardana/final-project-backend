@@ -12,12 +12,16 @@ import (
 	"vaccine-app-be/drivers/records"
 	"vaccine-app-be/drivers/repository/CitizenRepository/mocks"
 	familyMock "vaccine-app-be/drivers/repository/FamilyRepository/mocks"
+	detailMock "vaccine-app-be/drivers/repository/VaccineSessionDetailRepository/mocks"
+	sessionMock "vaccine-app-be/drivers/repository/VaccineSessionRepository/mocks"
 	"vaccine-app-be/utilities"
 )
 
 var (
 	citizenRepository mocks.CitizenRepository
 	familyRepository  familyMock.FamilyRepository
+	sessionRepository sessionMock.VaccineSessionRepository
+	detailRepository  detailMock.VaccineSessionDetail
 	jwtAuth           *middleware2.ConfigJWT
 	service           CitizenService
 )
@@ -27,7 +31,7 @@ func setup() CitizenService {
 		SecretJWT: "testmock123",
 		ExpiredIn: 2,
 	}
-	citizenService := NewCitizenService(&citizenRepository, jwtAuth, &familyRepository)
+	citizenService := NewCitizenService(&citizenRepository, jwtAuth, &familyRepository, &sessionRepository, &detailRepository)
 
 	return citizenService
 }
@@ -184,7 +188,7 @@ func TestUpdate(t *testing.T) {
 		citizenRepository.On("Update", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("time.Time"), mock.AnythingOfType("string")).Return(expectedReturn, nil).Once()
 		familyRepository.On("GetCitizenOwnFamily", mock.Anything, mock.AnythingOfType("int")).Return([]records.FamilyMember{}, errors).Once()
 
-		_ , err := CitizenService.Update(context.Background(), ctxId, domain.Birthday, domain.Address)
+		_, err := CitizenService.Update(context.Background(), ctxId, domain.Birthday, domain.Address)
 		assert.Equal(t, err, errors)
 
 	})

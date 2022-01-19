@@ -1,571 +1,637 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  title: Vaccine Docs API
-  description: Vaccine Docs API - Alterra Academy
+  title: vaccine-API
   version: 1.0.0
 servers:
-  - url: 'https://localhost:8080/api/v1'
-
+  - url: http://{{host}}
+  - url: http://{{https_host}}
+  - url: http://{{local}}
+  - url: http://localhost:8080
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
 tags:
-  - name: Healts Facilitators
-    description: Sebuah lembaga yang bertanggung jawab melakukan vaksinisasi.
   - name: Citizens
-    description: Masyarakat yang berhubungan dengan sistem
-  - name: CRUD family
-    description: Cread, ready, update, dan delete untuk citizen terhadap keluarga mereka.
-
+  - name: HealthFacilitators
+  - name: Family
+  - name: Booking Session API
 paths:
-  /citizen/registers:
+  /api/v1/citizen/logins:
     post:
       tags:
         - Citizens
-      description: citizens register to system
-      summary: citizens register
+      summary: Citizens Login
       requestBody:
         content:
           application/json:
             schema:
               type: object
-              properties:
-                email:
-                  type: string
-                  example: juna@yawanmail.comn
-                password:
-                  type: string
-                  example: wakwow123
-                confirmation_password:
-                  type: string
-                  example: wakwow123
-                full_name:
-                  type: string
-                  example: junaawjside
-                NIK:
-                  type: string
-                  example: 123asdsad
+              example:
+                email: bajanrdana23@gmail.com
+                password: '123456'
       responses:
-        200:
-          description: OK
+        '200':
+          description: Successful response
           content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  meta:
-                    $ref: "#/components/schemas/successResponse"
-                  data:
-                    $ref: "#/components/schemas/userRegisterResponse"
-        400:
-          description: Bad Request
+            application/json: {}
+  /api/v1/citizen/profiles:
+    get:
+      tags:
+        - Citizens
+      summary: CitizenFindById Copy
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
           content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response404"
-        500:
-          description: Internal Server Error
+            application/json: {}
+  /api/v1/citizen/sessions:
+    get:
+      tags:
+        - Citizens
+      summary: Get Citizen And Family SESSION Copy
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
           content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response500"
-  /citizen/logins:
+            application/json: {}
+  /api/v1/citizen/registers:
     post:
       tags:
         - Citizens
-      description: citizen login
-      summary: citizen login
+      summary: CitizenRegister
       requestBody:
         content:
           application/json:
             schema:
               type: object
-              properties:
-                email:
-                  type: string
-                  example: juna@yawanmail.comn
-                password:
-                  type: string
-                  example: password123
+              example:
+                email: bajanrdana23@gmail.com
+                password: '123456'
+                name: agus janardana
+                birthday: '2021-12-27T10:31:58Z'
+                NIK: '123124'
+                handphone_number: '123123'
+                age: 12
+                gender: Male
       responses:
-        200:
-          description: OK
+        '200':
+          description: Successful response
           content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  meta:
-                    $ref: "#/components/schemas/successResponse"
-                  data:
-                    type: object
-                    properties:
-                      token:
-                        type: string
-                        example: 123132asdasdas12sad
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response404"
-        500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response500"
-  /admin/registers:
-    post:
-      tags:
-        - Healts Facilitators
-      description: Health Facilitators API to register
-      summary: HF to register
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                facilitator_name:
-                  type: string
-                  example: test
-                email:
-                  type: string
-                  example: test@gmail.com
-                password:
-                  type: string
-                  example: test123password
-                address:
-                  type: string
-                  example: address
-                longitude:
-                  type: string
-                  example: 123asda
-                latitude:
-                  type: string
-                  example: -123142
-                type:
-                  type: string
-                  example: Rumah Sakit
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/healthRegisterResponse"
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response404"
-        500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response500"
-  /admin/logins:
-    post:
-      tags:
-        - Healts Facilitators
-      description: Healts Facilitators Login
-      summary: Healts Facilitators Login
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  example: juna@yawanmail.comn
-                password:
-                  type: string
-                  example: password123
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  meta:
-                    $ref: "#/components/schemas/successResponse"
-                  data:
-                    type: object
-                    properties:
-                      token:
-                        type: string
-                        example: 123132asdasdas12sad
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response404"
-        500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response500"
-  /families/{id}:
-    get:
-      tags:
-        - CRUD family
-      summary: "Get family member by its ID"
-      description: "To get family member by id"
-      parameters:
-        - name: id
-          in: path
-          description: your own id
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  meta:
-                    $ref: "#/components/schemas/successResponse"
-                  data:
-                    $ref: "#/components/schemas/getFamilyByIdResponse"
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response404"
-        500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response500"
-  /families:
-    post:
-      tags:
-        - CRUD family
-      description: create family
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#components/schemas/addFamilyRequest"
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  meta:
-                    $ref: "#/components/schemas/successResponse"
-                  data:
-                    $ref: "#/components/schemas/addFamilyResponse"
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response404"
-        500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response500"
-  /family/citizens:
-    get:
-      tags:
-        - CRUD family
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  meta:
-                    $ref: "#/components/schemas/successResponse"
-                  data:
-                    $ref: "#/components/schemas/getFamilyOwnedByCitizenResponse"
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response404"
-        500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response500"
-  /families/edit/{id}:
+            application/json: {}
+  /api/v1/citizens:
     put:
       tags:
-        - CRUD family
-      summary: "Edit your Family Member"
-      parameters:
-        - name: id
-          in: path
-          description: your own id
+        - Citizens
+      summary: Update Citizen
       requestBody:
         content:
           application/json:
             schema:
               type: object
-              properties:
-                name:
-                  type: string
-                  example: agus
-                birthday:
-                  type: string
-                  example: 12-12-12-12
-                nik:
-                  type: integer
-                  example: 1234
-                gender:
-                  type: string
-                  example: male
-                age:
-                  type: integer
-                  example: 12
-                handphone:
-                  type: string
-                  example: 123123
+              example:
+                birthday: '2021-11-27T10:31:58Z'
+                address: jalan
+      security:
+        - bearerAuth: []
       responses:
-        200:
-          description: OK
+        '200':
+          description: Successful response
           content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  meta:
-                    $ref: "#/components/schemas/successResponse"
-                  data:
-                    $ref: "#/components/schemas/addFamilyResponse"
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response404"
-        500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response500"
-  /families/delete/{id}:
-    delete:
+            application/json: {}
+  /api/v1/citizen/profile/{id}:
+    get:
       tags:
-        - CRUD family
+        - Citizens
+      summary: CitizenFindById
+      security:
+        - bearerAuth: []
       parameters:
         - name: id
           in: path
-          description: your own id
+          schema:
+            type: integer
+          required: true
+          description: id ini adalah id citizennya
+          example: '3'
       responses:
-        200:
-          description: OK
+        '200':
+          description: Successful response
           content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  meta:
-                    $ref: "#/components/schemas/successResponse"
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: success delete family
-        400:
-          description: Bad Request
+            application/json: {}
+  /api/v1/admin/registers:
+    post:
+      tags:
+        - HealthFacilitators
+      summary: Register Health Facilitators
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                facilitator_name: test
+                email: test3@gmail.com
+                password: test123password
+                address: here is address
+                longitude: 123123asde
+                latitude: a123asd
+                type: rumah sakit
+      responses:
+        '200':
+          description: Successful response
           content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response404"
-        500:
-          description: Internal Server Error
+            application/json: {}
+  /api/v1/admin/logins:
+    post:
+      tags:
+        - HealthFacilitators
+      summary: Login Health Facilitators
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: test2@gmail.com
+                password: test123password
+      responses:
+        '200':
+          description: Successful response
           content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/response500"
-
-
-
-
-components:
-  schemas:
-    getFamilyOwnedByCitizenResponse:
-      type: array
-      items:
-        type: object
-        properties:
-          id:
+            application/json: {}
+  /api/v1/admins:
+    get:
+      tags:
+        - HealthFacilitators
+      summary: Get All HF & detail
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/admin/{id}:
+    get:
+      tags:
+        - HealthFacilitators
+      summary: Health Facilitator Find By ID
+      parameters:
+        - name: id
+          in: path
+          schema:
             type: integer
-            example: 1
-          name:
-            type: string
-            example: agus
-          birthday:
-            type: string
-            example: 12-12-12-12
-          nik:
+          required: true
+          description: id ini adalah id health facilitatorsnya
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - HealthFacilitators
+      summary: Update HealthFacilitators
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                facilitator_name: TESTEDIT
+                facilitators_certification: TESTEDIT
+                address: TESTEDIT
+                longitude: TESTEDIT
+                latitude: TESTEDIT
+                type: TESTEDIT
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
             type: integer
-            example: 1234
-          gender:
-            type: string
-            example: male
-          age:
+          required: true
+          description: ID ini adalah ID ADMIN
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/admin/family/{id}:
+    put:
+      tags:
+        - HealthFacilitators
+      summary: Update Family Member By HF ( Gunakan di menu Health Facilitators !!! )
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                status_vaccines: DOSIS 1
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
             type: integer
-            example: 12
-          handphone:
+          required: true
+          description: id ini adalah id family members
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/families/1:
+    get:
+      tags:
+        - Family
+      summary: Get Family by ID
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/family/citizens:
+    get:
+      tags:
+        - Family
+      summary: get family owned by a citizen
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/families:
+    post:
+      tags:
+        - Family
+      summary: Create Family
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Juna ID 3
+                birthday: '2021-12-27T10:31:58Z'
+                nik: '12123123'
+                age: 15
+                handphone: '087762827666'
+                gender: Male
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/families/{id}:
+    put:
+      tags:
+        - Family
+      summary: Update Family By Id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: JunaEDIT
+                birthday: '2021-12-27T10:31:58Z'
+                nik: '12123123'
+                age: 15
+                handphone: '087762827666'
+                gender: Male
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
             type: string
-            example: 123123
-    addFamilyResponse:
-      type: object
-      properties:
-        name:
-          type: string
-          example: Juna
-        birthday:
-          type: string
-          example: 2021-12-27T10:31:58Z
-        nik:
-          type: integer
-          example: 123123123
-        age:
-          type: integer
-          example: 12
-        handphone:
-          type: string
-          example: 198238921
-        gender:
-          type: string
-          example: male
-    addFamilyRequest:
-      type: object
-      properties:
-        name:
-          type: string
-          example: Juna
-        birthday:
-          type: string
-          example: 2021-12-27T10:31:58Z
-        nik:
-          type: integer
-          example: 123123123
-        age:
-          type: integer
-          example: 12
-        handphone:
-          type: string
-          example: 198238921
-        gender:
-          type: string
-          example: male
-    getFamilyByIdResponse:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        name:
-          type: string
-          example: agus
-        birthday:
-          type: string
-          example: 24-09-2049ISO
-        nik:
-          type: integer
-          example: 1231231238
-        gender:
-          type: string
-          example: male
-        age:
-          type: integer
-          example: 14
-        Handphone:
-          type: string
-          example: 123198123
-    healthRegisterResponse:
-      type: object
-      properties:
-        facilitator_name:
-          type: string
-          example: test
-        email:
-          type: string
-          example: test@gmail.com
-        address:
-          type: string
-          example: address
-        longitude:
-          type: string
-          example: 123asda
-        latitude:
-          type: string
-          example: -123142
-        type:
-          type: string
-          example: Rumah Sakit
-    userRegisterResponse:
-      type: object
-      properties:
-        email:
-          type: string
-          example: juna@yawanmail.comn
-        full_name:
-          type: string
-          example: chefjuna
-        NIK:
-          type: string
-          example: testing
-    successResponse:
-      type: object
-      properties:
-          status:
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/families/3:
+    delete:
+      tags:
+        - Family
+      summary: Delete a Family Members
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vaccines:
+    post:
+      tags:
+        - CRUD vaccine ( need login as HF )
+      summary: Create Vaccine ( LOGIN AS HF FIRST )
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Sinovac2
+                stock: 50
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vaccine/{id}:
+    get:
+      tags:
+        - CRUD vaccine ( need login as HF )
+      summary: Find Vaccine by Id
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
             type: integer
-            example: 200
-          message:
-            type: string
-            example: Success
-    response404:
-      type: object
-      properties:
-        meta:
-          type: object
-          properties:
-            status:
-              type: integer
-              example: 400
-            messages:
-              type: string
-              example: Error message put here...
-    response500:
-      type: object
-      properties:
-        meta:
-          type: object
-          properties:
-            status:
-              type: integer
-              example: 500
-            message:
-              type: string
-              example: Internal Server Error
-
-
-
-
-
-  
+          required: true
+          example: '4'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - CRUD vaccine ( need login as HF )
+      summary: Edit Vaccine by ID ( LOGIN AS HF FIRST )
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: SinovacEDIT
+                stock: 200
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - CRUD vaccine ( need login as HF )
+      summary: Delete Vaccine by ID ( LOGIN AS HF FIRST )
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vaccines/1:
+    get:
+      tags:
+        - CRUD vaccine ( need login as HF )
+      summary: Find Vaccine Owned By HF ( LOGIN HF FIRST !)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vaccine/sessions:
+    post:
+      tags:
+        - CRUD session ( login as HF first)
+      summary: Create Vaccine Session ( Login as HF first) Copy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                start_date: '2021-11-27T10:31:58Z'
+                end_date: '2021-11-27T10:31:58Z'
+                quota: 40
+                session_type: SESI 1
+                vaccine_id: 2
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - CRUD session ( login as HF first)
+      summary: Get All Vaccine Sessions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vaccine/session/{id}:
+    get:
+      tags:
+        - CRUD session ( login as HF first)
+      summary: Get Session By ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          example: '8'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - CRUD session ( login as HF first)
+      summary: Delete Session By Id (login to owner HF)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          description: id ini adalah id session
+          example: '6'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - CRUD session ( login as HF first)
+      summary: Edit Session
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                start_date: '2021-11-27T10:31:58Z'
+                end_date: '2021-11-27T10:31:58Z'
+                quota: 200
+                session_type: SESI 1
+                vaccine_id: 1
+                status: UNAVAILABLE
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          description: id session
+          example: '6'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/vaccine/session/owned/{id}:
+    get:
+      tags:
+        - CRUD session ( login as HF first)
+      summary: Get Session Owned By HF
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          description: id ini adalah id health facilitatornya
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/session/bookings/{id}:
+    post:
+      tags:
+        - Booking Session API
+      summary: Citizen Booking Session
+      requestBody:
+        content: {}
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          description: ID SESSIONNYA
+          example: '5'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/session/family/8:
+    get:
+      tags:
+        - Booking Session API
+      summary: Get Session Detail by Family Id
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/session/detail/{id}:
+    get:
+      tags:
+        - Booking Session API
+      summary: Get Session Detail By Detail Id
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          description: id ini adalah id session detail nya
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/v1/session/{id}:
+    get:
+      tags:
+        - Booking Session API
+      summary: Get Detail by Session ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          description: ID ini adalah ID sessionnya
+          example: '1'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

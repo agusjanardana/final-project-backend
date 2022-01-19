@@ -38,6 +38,7 @@ func (c1 *ControllerList) Registration(e *echo.Echo) {
 	apiV1.GET("/admin/:id", c1.HealthController.FindById)
 	apiV1.PUT("/admin/:id", c1.HealthController.Update, middleware.JWTWithConfig(c1.JWTMiddleware))
 	apiV1.PUT("/admin/family/:id", c1.HealthController.HealthUpdateFamilyMemberStatus, middleware.JWTWithConfig(c1.JWTMiddleware))
+	apiV1.GET("/admin/related/:id", c1.CitizenController.GetCitizenRelationWithHealthFacilitators, middleware.JWTWithConfig(c1.JWTMiddleware))
 
 	//  FAMILY THINGS
 	apiV1.GET("/families/:id", c1.FamilyController.GetFamilyById, middleware.JWTWithConfig(c1.JWTMiddleware))
