@@ -19,12 +19,34 @@ type Citizen struct {
 	Age             int
 	Gender          string
 	Birthday        time.Time
-	FamilyMember   []FamilyMember
+	FamilyMember    []FamilyMember
 }
 
 type FamilyMember struct {
-	Id   int
-	Name string
+	Id             int
+	Name           string
+	StatusVaccines string
+}
+
+type CitizenStruct struct {
+	Id              int
+	Name            string
+	Email           string
+	Password        string
+	NIK             string
+	Address         string
+	HandphoneNumber string
+	VaccinePass     string
+	Age             int
+	Gender          string
+	Birthday        time.Time
+	FamilyMember    []FamilyMemberStruct
+}
+
+type FamilyMemberStruct struct {
+	Id             int
+	Name           string
+	StatusVaccines string
 }
 
 func (c *Citizen) ToRecordFamily() records.FamilyMember {

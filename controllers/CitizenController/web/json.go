@@ -44,6 +44,7 @@ type CitizenUpdateResponse struct {
 }
 
 type RespondFind struct {
+	Id              int            `json:"id"`
 	Name            string         `json:"name"`
 	Email           string         `json:"email"`
 	NIK             string         `json:"nik"`

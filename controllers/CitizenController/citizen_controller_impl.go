@@ -109,6 +109,5 @@ func (citizenCtrl *CitizenControllerImpl) GetCitizenRelationWithHealthFacilitato
 
 	var response []web.RespondFind
 	copier.Copy(&response, &facilitatorsData)
-
 	return controllers.NewSuccessResponse(c, response)
 }
