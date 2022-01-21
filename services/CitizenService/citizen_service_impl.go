@@ -136,14 +136,18 @@ func (service *CitizenServiceImpl) GetCitizenRelationWithHealthFacilitators(ctx 
 		if err != nil {
 			return nil, err
 		}
-		idFamily = append(idFamily, dataDetail[i].FamilyMemberId)
+		for _ , v := range dataDetail{
+			idFamily = append(idFamily, v.FamilyMemberId)
+		}
 	}
+
 
 	var idCitizen []int
 	for i := 0; i < len(idFamily); i++ {
-		dataFamily, err := service.FamilyRepository.GetFamilyById(ctx, idFamily[i])
-		if err != nil {
-			return nil, err
+		dataFamily, _ := service.FamilyRepository.GetFamilyById(ctx, idFamily[i])
+
+		if dataFamily.Id == 0 {
+			continue
 		}
 
 		skip := false
@@ -158,7 +162,7 @@ func (service *CitizenServiceImpl) GetCitizenRelationWithHealthFacilitators(ctx 
 		}
 	}
 
-	data := make([]Citizen, len(idCitizen)-1)
+	var data []Citizen
 	for i := 0;i < len(idCitizen); i++ {
 		dataCitizenRepo, err := service.CitizenRepository.FindById(ctx, idCitizen[i])
 		if err != nil {
@@ -166,7 +170,9 @@ func (service *CitizenServiceImpl) GetCitizenRelationWithHealthFacilitators(ctx 
 		}
 		response := Citizen{}
 		copier.Copy(&response, &dataCitizenRepo)
+
 		data = append(data, response)
 	}
+
 	return data, nil
 }

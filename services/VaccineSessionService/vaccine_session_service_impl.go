@@ -165,7 +165,6 @@ func (service *VaccineSessionServiceImpl) GetCitizenAndFamilySelectedSession(ctx
 		return nil, errors.New("this citizen and family not selected any vaccine session")
 	}
 
-
 	data := make([]VaccineSession, len(uniqueSession)-1)
 	for _, v := range uniqueSession {
 		dataRepository, err := service.vaccineSessionRepository.FindById(ctx, v)
@@ -176,6 +175,7 @@ func (service *VaccineSessionServiceImpl) GetCitizenAndFamilySelectedSession(ctx
 		copier.Copy(&translate, dataRepository)
 		data = append(data, translate)
 	}
+
 
 	return data, nil
 }
