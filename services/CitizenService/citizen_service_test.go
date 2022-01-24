@@ -228,3 +228,61 @@ func TestFindById(t *testing.T) {
 	})
 
 }
+
+func TestGetCitizenRelationWithHealthFacilitators(t *testing.T){
+	CitizenService := setup()
+	t.Run("test case 1, success get all data", func(t *testing.T) {
+		hfId := 1
+		expectedReturnFindSession := []records.VaccineSession{
+			{
+				Id:                  1,
+				StartDate:           time.Now(),
+				EndDate:             time.Now().AddDate(2024, 9, 12),
+				Quota:               200,
+				SessionType:         "SESI 1",
+				VaccineId:           1,
+				HealthFacilitatorId: 1,
+				Status:              "AVAILABLE",
+			},
+		}
+
+		expectedReturnSessionDetail := []records.VaccineSessionDetail{
+			{
+				Id:             1,
+				SessionId:      1,
+				FamilyMemberId: 1,
+			},
+		}
+
+		expectedReturnFamily := records.FamilyMember{
+			Id:        1,
+			Name:      "Agus",
+			Birthday:  time.Now(),
+			Nik:       "2313131",
+			Gender:    "Male",
+			Age:       15,
+			Handphone: "087762827361",
+			CitizenId: 1,
+		}
+		expectedReturnCitizen := records.Citizen{
+			Id:              1,
+			Name:            "agus",
+			Email:           "bjanardana@gmail.com",
+			Password:        "23123asdasd",
+			NIK:             "123123",
+			Address:         "jalan",
+			HandphoneNumber: "08123123123",
+			Gender:          "Male",
+			Age:             13,
+			VaccinePass:     "ADa",
+		}
+
+		sessionRepository.On("FindSessionOwnedByHf", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturnFindSession, nil).Once()
+		detailRepository.On("GetDetailBySessionId", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturnSessionDetail, nil).Once()
+		familyRepository.On("GetFamilyById",mock.Anything, mock.AnythingOfType("int")).Return(expectedReturnFamily,nil).Once()
+		citizenRepository.On("FindById", mock.Anything, mock.AnythingOfType("int")).Return(expectedReturnCitizen,nil).Once()
+
+		_, err := CitizenService.GetCitizenRelationWithHealthFacilitators(context.Background(), hfId)
+		assert.Nil(t, err)
+	})
+}
