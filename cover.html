@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">vaccine-app-be/services/CitizenService/citizen_service_impl.go (85.5%)</option>
+				<option value="file0">vaccine-app-be/services/CitizenService/citizen_service_impl.go (82.6%)</option>
 				
 				<option value="file1">vaccine-app-be/services/CitizenService/domain.go (100.0%)</option>
 				
@@ -65,7 +65,7 @@
 				
 				<option value="file4">vaccine-app-be/services/HfService/domain.go (50.0%)</option>
 				
-				<option value="file5">vaccine-app-be/services/HfService/health_service_impl.go (80.4%)</option>
+				<option value="file5">vaccine-app-be/services/HfService/health_service_impl.go (82.1%)</option>
 				
 				<option value="file6">vaccine-app-be/services/SessionDetailService/session_detail_impl.go (85.4%)</option>
 				
@@ -102,20 +102,27 @@ import (
         "vaccine-app-be/drivers/records"
         "vaccine-app-be/drivers/repository/CitizenRepository"
         "vaccine-app-be/drivers/repository/FamilyRepository"
+        "vaccine-app-be/drivers/repository/VaccineSessionDetailRepository"
+        "vaccine-app-be/drivers/repository/VaccineSessionRepository"
         "vaccine-app-be/utilities"
 )
 
 type CitizenServiceImpl struct {
-        CitizenRepository CitizenRepository.CitizenRepository
-        jwtAuth           *middleware.ConfigJWT
-        FamilyRepository  FamilyRepository.FamilyRepository
+        CitizenRepository        CitizenRepository.CitizenRepository
+        jwtAuth                  *middleware.ConfigJWT
+        FamilyRepository         FamilyRepository.FamilyRepository
+        vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository
+        sessionDetail            VaccineSessionDetailRepository.VaccineSessionDetail
 }
 
-func NewCitizenService(CitizenRepository CitizenRepository.CitizenRepository, jwtAuth *middleware.ConfigJWT, FamilyRepository FamilyRepository.FamilyRepository) CitizenService <span class="cov8" title="1">{
+func NewCitizenService(CitizenRepository CitizenRepository.CitizenRepository, jwtAuth *middleware.ConfigJWT, FamilyRepository FamilyRepository.FamilyRepository, vaccineSessionRepository VaccineSessionRepository.VaccineSessionRepository, sessionDetail VaccineSessionDetailRepository.VaccineSessionDetail,
+) CitizenService <span class="cov8" title="1">{
         return &amp;CitizenServiceImpl{
-                CitizenRepository: CitizenRepository,
-                jwtAuth:           jwtAuth,
-                FamilyRepository:  FamilyRepository,
+                CitizenRepository:        CitizenRepository,
+                jwtAuth:                  jwtAuth,
+                FamilyRepository:         FamilyRepository,
+                vaccineSessionRepository: vaccineSessionRepository,
+                sessionDetail:            sessionDetail,
         }
 }</span>
 
@@ -208,6 +215,58 @@ func (service *CitizenServiceImpl) CitizenFindById(ctx context.Context, userId i
         return entityCitizenRespond, nil</span>
 }
 
+func (service *CitizenServiceImpl) GetCitizenRelationWithHealthFacilitators(ctx context.Context, hfId int) ([]Citizen, error) <span class="cov8" title="1">{
+        dataSessionHf, err := service.vaccineSessionRepository.FindSessionOwnedByHf(ctx, hfId)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var idFamily []int
+        for i := 0; i &lt; len(dataSessionHf); i++ </span><span class="cov8" title="1">{
+                dataDetail, err := service.sessionDetail.GetDetailBySessionId(ctx, dataSessionHf[i].Id)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">for _ , v := range dataDetail</span><span class="cov8" title="1">{
+                        idFamily = append(idFamily, v.FamilyMemberId)
+                }</span>
+        }
+
+
+        <span class="cov8" title="1">var idCitizen []int
+        for i := 0; i &lt; len(idFamily); i++ </span><span class="cov8" title="1">{
+                dataFamily, _ := service.FamilyRepository.GetFamilyById(ctx, idFamily[i])
+
+                if dataFamily.Id == 0 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov8" title="1">skip := false
+                for _, u := range idCitizen </span><span class="cov0" title="0">{
+                        if dataFamily.CitizenId == u</span><span class="cov0" title="0">{
+                                skip = true
+                                break</span>
+                        }
+                }
+                <span class="cov8" title="1">if !skip</span><span class="cov8" title="1">{
+                        idCitizen = append(idCitizen, dataFamily.CitizenId)
+                }</span>
+        }
+
+        <span class="cov8" title="1">var data []Citizen
+        for i := 0;i &lt; len(idCitizen); i++ </span><span class="cov8" title="1">{
+                dataCitizenRepo, err := service.CitizenRepository.FindById(ctx, idCitizen[i])
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">response := Citizen{}
+                copier.Copy(&amp;response, &amp;dataCitizenRepo)
+
+                data = append(data, response)</span>
+        }
+
+        <span class="cov8" title="1">return data, nil</span>
+}
 </pre>
 		
 		<pre class="file" id="file1" style="display: none">package CitizenService
@@ -231,12 +290,34 @@ type Citizen struct {
         Age             int
         Gender          string
         Birthday        time.Time
-        FamilyMember   []FamilyMember
+        FamilyMember    []FamilyMember
 }
 
 type FamilyMember struct {
-        Id   int
-        Name string
+        Id             int
+        Name           string
+        StatusVaccines string
+}
+
+type CitizenStruct struct {
+        Id              int
+        Name            string
+        Email           string
+        Password        string
+        NIK             string
+        Address         string
+        HandphoneNumber string
+        VaccinePass     string
+        Age             int
+        Gender          string
+        Birthday        time.Time
+        FamilyMember    []FamilyMemberStruct
+}
+
+type FamilyMemberStruct struct {
+        Id             int
+        Name           string
+        StatusVaccines string
 }
 
 func (c *Citizen) ToRecordFamily() records.FamilyMember <span class="cov8" title="1">{
@@ -588,7 +669,7 @@ func (service *HealthServiceImpl) Login(ctx context.Context, email, password str
 
 func (service *HealthServiceImpl) GetAllHealthFacilitator(ctx context.Context) ([]HealthFacilitator, error) <span class="cov8" title="1">{
         facilitator, err := service.HealthRepository.GetAllHealthFacilitator(ctx)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return nil, err
         }</span>
 
@@ -1041,26 +1122,26 @@ func (service *VaccineSessionServiceImpl) GetCitizenAndFamilySelectedSession(ctx
                 return nil, err
         }</span>
         <span class="cov8" title="1">var uniqueSession []int
-        for _, v := range familyData</span><span class="cov8" title="1">{
+        for _, v := range familyData </span><span class="cov8" title="1">{
                 skip := false
-                for _, u := range uniqueSession</span><span class="cov8" title="1">{
+                for _, u := range uniqueSession </span><span class="cov8" title="1">{
                         if v.VaccineSessionDetail.SessionId == u </span><span class="cov8" title="1">{
                                 skip = true
                                 break</span>
                         }
                 }
-                <span class="cov8" title="1">if !skip</span><span class="cov8" title="1">{
+                <span class="cov8" title="1">if !skip </span><span class="cov8" title="1">{
                         temp := v.VaccineSessionDetail.SessionId
-                        uniqueSession = append(uniqueSession,temp)
+                        uniqueSession = append(uniqueSession, temp)
                 }</span>
         }
 
-        <span class="cov8" title="1">if len(uniqueSession) == 0</span><span class="cov0" title="0">{
+        <span class="cov8" title="1">if len(uniqueSession) == 0 </span><span class="cov0" title="0">{
                 return nil, errors.New("this citizen and family not selected any vaccine session")
         }</span>
 
-        <span class="cov8" title="1">data := make([]VaccineSession, len(uniqueSession))
-        for _ , v := range uniqueSession</span><span class="cov8" title="1">{
+        <span class="cov8" title="1">data := make([]VaccineSession, len(uniqueSession)-1)
+        for _, v := range uniqueSession </span><span class="cov8" title="1">{
                 dataRepository, err := service.vaccineSessionRepository.FindById(ctx, v)
                 if err != nil </span><span class="cov0" title="0">{
                         return nil, err
@@ -1069,6 +1150,7 @@ func (service *VaccineSessionServiceImpl) GetCitizenAndFamilySelectedSession(ctx
                 copier.Copy(&amp;translate, dataRepository)
                 data = append(data, translate)</span>
         }
+
 
         <span class="cov8" title="1">return data, nil</span>
 }

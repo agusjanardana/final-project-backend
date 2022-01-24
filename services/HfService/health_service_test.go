@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 	"log"
 	"testing"
 	"vaccine-app-be/app/middleware"
@@ -128,7 +129,7 @@ func TestLogin(t *testing.T) {
 
 func TestGetAllHf(t *testing.T) {
 	HealthService := setup()
-	t.Run("test case 1, success login", func(t *testing.T) {
+	t.Run("test case 1, success get all health", func(t *testing.T) {
 		expectedReturn := []records.HealthFacilitator{
 			{
 				Name:    "RS A",
@@ -145,6 +146,13 @@ func TestGetAllHf(t *testing.T) {
 		facilitatorData, err := HealthService.GetAllHealthFacilitator(context.Background())
 		assert.Nil(t, err)
 		assert.Equal(t, facilitatorData[0].Name, expectedReturn[0].Name)
+	})
+	t.Run("test case 2, cannot get all data", func(t *testing.T) {
+
+		healthRepository.On("GetAllHealthFacilitator", mock.Anything).Return([]records.HealthFacilitator{}, gorm.ErrRecordNotFound).Once()
+
+		_, err := HealthService.GetAllHealthFacilitator(context.Background())
+		assert.NotEmpty(t, err)
 	})
 }
 
