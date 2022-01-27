@@ -7,6 +7,7 @@ type VaccineCreateRequest struct {
 }
 
 type VaccineCreateResponse struct {
+	Id                  int    `json:"id"`
 	HealthFacilitatorId int    `json:"health_facilitator_id"`
 	Name                string `json:"name"`
 	Stock               int    `json:"stock"`

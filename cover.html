@@ -63,7 +63,7 @@
 				
 				<option value="file3">vaccine-app-be/services/FamilyService/family_service_impl.go (85.3%)</option>
 				
-				<option value="file4">vaccine-app-be/services/HfService/domain.go (50.0%)</option>
+				<option value="file4">vaccine-app-be/services/HfService/domain.go (100.0%)</option>
 				
 				<option value="file5">vaccine-app-be/services/HfService/health_service_impl.go (82.1%)</option>
 				
@@ -563,15 +563,6 @@ type VaccineSessionDetail struct {
         SessionId      int
         FamilyMemberId int
 }
-
-func (hf HealthFacilitator) ValidateRequest() error <span class="cov0" title="0">{
-        return validation.ValidateStruct(&amp;hf,
-                //                validasi request email
-                validation.Field(&amp;hf.Email, validation.Required, is.Email),
-                //                validasi Password
-                validation.Field(&amp;hf.Password, validation.Required),
-        )
-}</span>
 
 func (hf HealthFacilitator) Validate() error <span class="cov8" title="1">{
         return validation.ValidateStruct(&amp;hf,
