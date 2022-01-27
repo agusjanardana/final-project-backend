@@ -46,15 +46,6 @@ type VaccineSessionDetail struct {
 	FamilyMemberId int
 }
 
-func (hf HealthFacilitator) ValidateRequest() error {
-	return validation.ValidateStruct(&hf,
-		//		validasi request email
-		validation.Field(&hf.Email, validation.Required, is.Email),
-		//		validasi Password
-		validation.Field(&hf.Password, validation.Required),
-	)
-}
-
 func (hf HealthFacilitator) Validate() error {
 	return validation.ValidateStruct(&hf,
 		//validasi Nama tidak boleh kosong
